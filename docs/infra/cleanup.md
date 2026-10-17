@@ -31,7 +31,9 @@ Keep (shared with the EC2 app): SES identity `rolandfuest.com`, SNS topic `bitew
 - [ ] Cognito domain, generated prefix (must go before the pool)
 - [ ] User Pool (no deletion protection; app client, Google IdP, triggers go with it)
 - [ ] Trigger Lambdas (custom message, post-confirmation, pre-sign-up) + roles + log groups
-- [ ] Google OAuth client in Google Cloud console
+- [ ] Google OAuth client: **shared with the EC2 app, never delete it.** Remove only the Cognito JS
+      origin and `/oauth2/idpresponse` redirect URI, delete the Cognito secret (keep the EC2 one), and
+      remove `amazoncognito.com` from Branding → Authorized domains if nothing else uses it
 
 ## 2. Web hosting
 

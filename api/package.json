@@ -2,8 +2,24 @@
   "name": "@bitewise/api",
   "private": true,
   "type": "module",
-  "description": "Placeholder: resource Lambdas land here in runbook section 4.",
+  "description": "Lambda handlers: Cognito triggers now, resource Lambdas in runbook section 4.",
+  "scripts": {
+    "build": "bun scripts/build.ts",
+    "test": "POWERTOOLS_LOG_LEVEL=SILENT bun test",
+    "typecheck": "tsc"
+  },
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.36.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.1152.0",
+    "@aws-sdk/client-dynamodb": "^3.1152.0",
+    "@aws-sdk/lib-dynamodb": "^3.1152.0",
     "@bitewise/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.164",
+    "@types/bun": "^1.4.3",
+    "@types/node": "^26.6.5",
+    "aws-sdk-client-mock": "^4.1.0",
+    "esbuild": "^0.28.2"
   }
 }

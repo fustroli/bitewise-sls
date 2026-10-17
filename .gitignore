@@ -13,3 +13,6 @@ out/
 .env*
 !.env.example
 *.pem
+
+# Lambda bundles
+api/dist/
