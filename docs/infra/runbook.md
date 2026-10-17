@@ -12,10 +12,10 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 | Item | Value |
 | --- | --- |
-| Domain (dev) | `sls.bitewise.rolandfuest.com` (DNS: Namecheap) |
+| App domain | `sls.bitewise.rolandfuest.com` (DNS: Namecheap) |
 | Repo | `bitewise-sls` (bun workspaces) |
-| CDK stacks | `bitewise-sls-dev-{data,auth,api,web}` |
-| Table | `bitewise-dev` |
+| CDK stacks | `bitewise-sls-{data,auth,api,web}` |
+| Table | `bitewise-sls` |
 | Web bucket | |
 | Avatar bucket | |
 | CloudFront distribution | |
@@ -30,7 +30,7 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## 1. Data
 
-- [ ] DynamoDB table: PK `PK` (S), SK `SK` (S), on-demand, no GSI, PITR off in dev
+- [ ] DynamoDB table: PK `PK` (S), SK `SK` (S), on-demand, no GSI, PITR off for now
 - [ ] Avatar bucket: private, Block Public Access on, lifecycle: expire `uploads/` after 1 day
 - [ ] Put/query a test item in the console (Explore items)
 - [ ] CDK: `Data` stack, `RemovalPolicy.RETAIN` on table + bucket
@@ -38,20 +38,20 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 ## 2. Web hosting
 
 - [ ] Web bucket: private, Block Public Access on, no static website hosting (OAC needs the REST endpoint)
-- [ ] ACM cert for the dev domain (us-east-1, DNS validation); validation CNAME at Namecheap
+- [ ] ACM cert for the app domain (us-east-1, DNS validation); validation CNAME at Namecheap
 - [ ] CloudFront distribution: origin = web bucket with OAC, default root object `index.html`,
-      alias = dev domain, bucket policy updated to allow the distribution only
+      alias = app domain, bucket policy updated to allow the distribution only
 - [ ] SPA fallback: custom error responses 403/404 → `/index.html` (200), or a CloudFront Function
-- [ ] Upload a placeholder `index.html`; DNS CNAME dev domain → distribution domain
+- [ ] Upload a placeholder `index.html`; DNS CNAME app domain → distribution domain
 - [ ] CDK: `Web` stack (leave the ACM validation CNAME in place)
 
 ## 3. Auth (Cognito)
 
 - [ ] User Pool: email sign-in, lowercase, Essentials tier, self sign-up on, email verification by code
-- [ ] App client: public (no secret), Authorization Code + PKCE, callback/sign-out URLs = dev domain
+- [ ] App client: public (no secret), Authorization Code + PKCE, callback/sign-out URLs = app domain
       (+ `http://localhost:3000`), access token 15 min, refresh 30 days
 - [ ] SES as email sender (`no-reply@rolandfuest.com`, existing identity)
-- [ ] Cognito domain (prefix domain is enough for dev); needed for the Google redirect
+- [ ] Cognito domain (a prefix domain is enough); needed for the Google redirect
 - [ ] Google IdP: new OAuth client in Google console, redirect URI = Cognito domain `/oauth2/idpresponse`;
       attribute mapping email → email
 - [ ] Lambda triggers: custom message (branded templates with the code), post-confirmation
@@ -89,7 +89,7 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 ## 6. Avatars
 
 - [ ] `POST /api/users/me/avatar-upload` returns a presigned POST to `uploads/<sub>/<ulid>`
-- [ ] Bucket CORS: allow `POST` from the dev domain
+- [ ] Bucket CORS: allow `POST` from the app domain
 - [ ] S3 event (`ObjectCreated`, prefix `uploads/`) → re-encode Lambda (`sharp`, arm64) →
       `avatars/<sub>/<ulid>.webp`, update profile, delete upload + previous avatar
 - [ ] CloudFront behavior `/avatars/*` → avatar bucket with OAC
@@ -101,7 +101,7 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 - [ ] GitHub OIDC provider in IAM + deploy role trusted for `repo:fustroli/bitewise-sls:ref:refs/heads/main`
 - [ ] Workflow: build web → sync → invalidate (no `cdk deploy` while resources are hand-made);
       Lambda code updates: build zip → `lambda update-function-code`
-- [ ] Prod: separate stacks, PITR on
+- [ ] PITR on the table once real data lives in it
 
 ## Gotchas hit
 
@@ -109,4 +109,4 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## Differs from `docs/plan.md`
 
-- Built side by side with EC2 on a dev subdomain; cutover/decommission (phases 6–7) not planned yet.
+- Built side by side with EC2 on the `sls.` subdomain; cutover/decommission (phases 6–7) not planned yet.

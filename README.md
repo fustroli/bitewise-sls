@@ -37,4 +37,4 @@ Everything is created by hand in the AWS console, following
 as CDK code and checked with `cdk synth`. That code is not deployed while the hand-made resources
 exist. [`docs/infra/cleanup.md`](docs/infra/cleanup.md) tears everything down in reverse order.
 
-Region `us-east-1`; dev domain `sls.bitewise.rolandfuest.com`.
+Region `us-east-1`; domain `sls.bitewise.rolandfuest.com`.

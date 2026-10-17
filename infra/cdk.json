@@ -1,7 +1,6 @@
 {
   "app": "bun run bin/app.ts",
   "context": {
-    "stage": "dev",
     "@aws-cdk/aws-signer:signingProfileNamePassedToCfn": true,
     "@aws-cdk/core:newStyleStackSynthesis": true,
     "@aws-cdk/core:stackRelativeExports": true,

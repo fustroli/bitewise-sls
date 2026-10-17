@@ -35,7 +35,7 @@ Keep (shared with the EC2 app): SES identity `rolandfuest.com`, SNS topic `bitew
 
 ## 2. Web hosting
 
-- [ ] Namecheap: dev domain CNAME → distribution
+- [ ] Namecheap: app domain CNAME → distribution
 - [ ] CloudFront distribution: **disable**, wait for deploy, then delete
 - [ ] OAC(s), response headers policy, CloudFront Functions (if any)
 - [ ] ACM certificate (after the distribution is gone) + its validation CNAME at Namecheap

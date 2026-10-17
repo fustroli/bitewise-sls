@@ -2,7 +2,7 @@
 
 Status: draft, revised 2026-10-15 against the final EC2 app (backend `53176af`, frontend `54c771c`).
 Replaces the single-EC2 stack (Next.js + NestJS + MySQL on one box), built side by side first.
-Region: `us-east-1`. Domain: `bitewise.rolandfuest.com` (DNS stays at Namecheap); dev runs on
+Region: `us-east-1`. Domain: `bitewise.rolandfuest.com` (DNS stays at Namecheap); the new stack runs on
 `sls.bitewise.rolandfuest.com`. Build order and console steps: `infra/runbook.md`.
 
 Domain terms (Owner, Owned resource, Meal ingredient, Calorie target, Macro plan, …) follow
@@ -10,7 +10,7 @@ Domain terms (Owner, Owned resource, Meal ingredient, Calorie target, Macro plan
 
 ## Goals
 
-- No servers to patch; true scale-to-zero; cost of cents/month at dev traffic.
+- No servers to patch; true scale-to-zero; cost of cents/month at current traffic.
 - AWS practice: Cognito, API Gateway, Lambda, DynamoDB modeling, event-driven S3, IaC.
 - Keep the domain rules (Ownership, per-Owner unique names, ordered Composition, in-use 409s).
 - Plain English only (drop i18n: today `en` + `hu`).
@@ -40,7 +40,7 @@ Browser ──presigned POST──► S3 uploads/ ──event──► Lambda (s
 | Infra | Manual console | Manual console, mirrored in CDK (TypeScript) as docs |
 | Config/secrets | `.env` on box | SSM Parameter Store (standard, free) |
 
-## Data model (DynamoDB single table `bitewise`)
+## Data model (DynamoDB single table `bitewise-sls`)
 
 Ids are ULIDs (sortable by creation time, strings). `sub` = Cognito user id = Owner.
 
@@ -186,18 +186,18 @@ Mitigated by short access-token lifetime + CSP. Revisit with a token-handler (BF
 - Repo `bitewise-sls` (monorepo: `infra/` CDK, `api/`, `web/`, `shared/`).
 - Built by hand in the console (`infra/runbook.md`), mirrored in CDK, torn down with
   `infra/cleanup.md`. CDK stacks: `Data`, `Auth`, `Api`, `Web`.
-- Environments: `dev` first; `prod` later (same account to start).
+- One environment, one AWS account: no dev/prod split.
 - CI: GitHub Actions with OIDC role → web build + sync, Lambda code updates.
 - Observability: CloudWatch log retention 14 days, Powertools structured logs, alarm on
   Lambda errors + 5xx → existing SNS topic `bitewise-ses-alerts`.
-- Backups: DynamoDB point-in-time recovery on the prod table.
+- Backups: DynamoDB point-in-time recovery, turned on once real data lives in the table.
 
 ## Phases
 
-1. **Foundations**: repo, CDK skeleton, `Data` + `Web`, empty SPA at the dev domain.
+1. **Foundations**: repo, CDK skeleton, `Data` + `Web`, empty SPA at `sls.bitewise.rolandfuest.com`.
 2. **Auth**: Cognito pool, domain, Google IdP, SES + triggers, sign-up/in pages working.
 3. **API + data**: ingredients → meals → meal plans → users; integration tests against
-   DynamoDB Local / a dev table.
+   DynamoDB Local.
 4. **Frontend port**: static export, data layer, auth pages, all dashboard pages
    (overview, draft, week, compare, lists, profile).
 5. **Avatars**: presigned upload + re-encode Lambda.
@@ -231,4 +231,3 @@ provisioned concurrency, customer-managed KMS keys, unlimited log retention.
   password-changed mail, no first password for Google-only users)? A custom SES Lambda could
   add the mails back.
 - Member cap 48 per Meal / Meal plan acceptable?
-- Separate AWS account for dev vs prod?
