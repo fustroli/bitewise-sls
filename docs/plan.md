@@ -126,7 +126,9 @@ change from int to ULID string.
 - Cognito domain (needed for the Google redirect even with own pages). Google IdP; Authorization
   Code + PKCE via `signInWithRedirect`.
 - Linking: pre-sign-up trigger links a Google sign-in to an existing native user with the same
-  email (`AdminLinkProviderForUser`), like today's auto-link.
+  email (`AdminLinkProviderForUser`), like today's auto-link. Only when Google verified the email.
+  An unconfirmed native user is deleted instead (its password was never proven), and a native
+  sign-up is rejected with "Email already in use." when a Google-only user has the email.
 - Email via SES (`no-reply@rolandfuest.com`, existing identity); custom message trigger renders
   today's branded layout (wordmark, card, footer, inline styles) with a **code** instead of a link.
 - Token lifetimes: access 15 min, refresh 30 days. Post-confirmation trigger creates `PROFILE`.

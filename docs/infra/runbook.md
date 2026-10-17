@@ -65,14 +65,17 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
       Cognito domain, redirect URI = Cognito domain `/oauth2/idpresponse`, a second client secret just
       for Cognito; `amazoncognito.com` in Branding → Authorized domains. Cognito provider: scopes
       `openid email profile`, mapping `email` and `email_verified`; enabled on the app client
-- [ ] Lambda triggers: custom message (branded templates with the code), post-confirmation
-      (create `PROFILE` item; needs `dynamodb:PutItem` on the table), pre-sign-up (link a Google
-      sign-in to an existing user with the same email; needs `cognito-idp:AdminLinkProviderForUser`,
-      `ListUsers`)
+- [x] Lambda triggers (code in `api/src/triggers/`, zips from `bun run build` in `api/`): "Event
+      function", Node 22 arm64, 256 MB, 5 s timeout (Cognito's limit), role "basic Lambda permissions"
+      + inline policy, log retention 14 days:
+      - `bitewise-sls-custom-message`: env `APP_URL`; branded sign-up, resend, reset, email-change codes
+      - `bitewise-sls-post-confirmation`: env `TABLE_NAME`; inline `put-profile` = `dynamodb:PutItem` on the table
+      - `bitewise-sls-pre-sign-up`: inline `link-users` = `ListUsers`, `AdminLinkProviderForUser`,
+        `AdminDeleteUser` on the pool
 - [x] Attribute change setting: keep original email active until the new one is verified
-- [ ] Verify: sign up a test user, receive code, confirm, profile item exists; Google sign-in with
+- [x] Verify: sign up a test user, receive code, confirm, profile item exists; Google sign-in with
       the same email lands on the same `sub`
-- [ ] CDK: `Auth` stack
+- [x] CDK: `Auth` stack (shared Lambda defaults in `infra/lib/bitewise-function.ts`)
 
 ## 4. API
 
@@ -117,6 +120,10 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## Gotchas hit
 
+- Lambda console asks "Event function" or "Web function": triggers are Event functions (no URL).
+- Managed login is email-first: "Forgot your password?" only shows after Next, on the password step.
+- Google → native linking in pre-sign-up worked on the first sign-in; the reported "Already found an
+  entry for username" first-attempt error did not occur.
 - Cognito quick setup: sign-in identifiers and required attributes can't be changed after
   creation; a wrong choice means recreating the pool.
 - Cognito SES settings: the FROM field is a dropdown of verified SES identities (pick the domain);
@@ -127,3 +134,6 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 ## Differs from `docs/plan.md`
 
 - Built side by side with EC2 on the `sls.` subdomain; cutover/decommission (phases 6–7) not planned yet.
+- Google client secret for CDK lives in Secrets Manager (`bitewise-sls/google-client-secret`, ~$0.40/month
+  once deployed), not SSM: CloudFormation can't resolve SecureString parameters for Cognito IdPs.
+- Emails use the frontend's current green palette and Manrope, not the backend layout's old yellow.
