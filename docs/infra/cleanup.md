@@ -43,8 +43,8 @@ Keep (shared with the EC2 app): SES identity `rolandfuest.com`, SNS topic `bitew
 
 ## 1. Data
 
-- [ ] Avatar bucket: empty (all versions if versioned), then delete
-- [ ] DynamoDB table (export first if the data matters)
+- [ ] Avatar bucket `bitewise-sls-avatars-<account-id>`: empty, then delete (versioning is off)
+- [ ] DynamoDB table `bitewise-sls` (export first if the data matters)
 
 ## 0. Repo
 

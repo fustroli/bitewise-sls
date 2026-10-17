@@ -15,9 +15,9 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 | App domain | `sls.bitewise.rolandfuest.com` (DNS: Namecheap) |
 | Repo | `bitewise-sls` (bun workspaces) |
 | CDK stacks | `bitewise-sls-{data,auth,api,web}` |
-| Table | `bitewise-sls` |
+| Table | `bitewise-sls` (on-demand, DynamoDB-owned key, no deletion protection) |
 | Web bucket | |
-| Avatar bucket | |
+| Avatar bucket | `bitewise-sls-avatars-<account-id>` |
 | CloudFront distribution | |
 | User Pool id / client id | |
 | HTTP API id | |
@@ -30,10 +30,10 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## 1. Data
 
-- [ ] DynamoDB table: PK `PK` (S), SK `SK` (S), on-demand, no GSI, PITR off for now
-- [ ] Avatar bucket: private, Block Public Access on, lifecycle: expire `uploads/` after 1 day
-- [ ] Put/query a test item in the console (Explore items)
-- [ ] CDK: `Data` stack, `RemovalPolicy.RETAIN` on table + bucket
+- [x] DynamoDB table: PK `PK` (S), SK `SK` (S), on-demand, no GSI, PITR off for now
+- [x] Avatar bucket: private, Block Public Access on, lifecycle: expire `uploads/` after 1 day
+- [x] Put/query a test item in the console (Explore items)
+- [x] CDK: `Data` stack, `RemovalPolicy.RETAIN` on table + bucket
 
 ## 2. Web hosting
 
@@ -105,7 +105,8 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## Gotchas hit
 
--
+- CDK `TableV2` synthesizes `AWS::DynamoDB::GlobalTable` (one replica), not the
+  `AWS::DynamoDB::Table` the console creates. Same table to the app; only matters for `cdk import`.
 
 ## Differs from `docs/plan.md`
 

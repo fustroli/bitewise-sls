@@ -34,5 +34,5 @@ of truth for behavior.
 
 ## Git
 
-- Branch off `main` for changes. Conventional commits (`feat:`, `fix:`, `docs:`, `chore:`).
+- Work directly on `main`; no feature branches. Conventional commits (`feat:`, `fix:`, `docs:`, `chore:`).
 - Never commit secrets, `.env` files or key files.
