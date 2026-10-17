@@ -36,10 +36,11 @@ Keep (shared with the EC2 app): SES identity `rolandfuest.com`, SNS topic `bitew
 ## 2. Web hosting
 
 - [ ] Namecheap: app domain CNAME → distribution
-- [ ] CloudFront distribution: **disable**, wait for deploy, then delete
-- [ ] OAC(s), response headers policy, CloudFront Functions (if any)
+- [ ] CloudFront distribution `E2ZKU5BXWC1GD9`: **disable**, wait for deploy, then delete
+- [ ] OAC(s) (`oac-bitewise-sls-web-…`), response headers policy, CloudFront Function `bitewise-sls-spa-rewrite`
 - [ ] ACM certificate (after the distribution is gone) + its validation CNAME at Namecheap
-- [ ] Web bucket: empty, then delete
+- [ ] Web bucket `bitewise-sls-web-<account-id>`: empty, then delete
+- [ ] Free flat-rate pricing plan: check it no longer lists the distribution (Pricing Plan Manager)
 
 ## 1. Data
 

@@ -16,9 +16,10 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 | Repo | `bitewise-sls` (bun workspaces) |
 | CDK stacks | `bitewise-sls-{data,auth,api,web}` |
 | Table | `bitewise-sls` (on-demand, DynamoDB-owned key, no deletion protection) |
-| Web bucket | |
+| Web bucket | `bitewise-sls-web-<account-id>` |
 | Avatar bucket | `bitewise-sls-avatars-<account-id>` |
-| CloudFront distribution | |
+| CloudFront distribution | `E2ZKU5BXWC1GD9` (`d2l2g1mwd2syrl.cloudfront.net`) |
+| Web bucket OAC | auto-named by the wizard: `oac-bitewise-sls-web-<account-id>.s3.us-east-1.amazo-<suffix>` |
 | User Pool id / client id | |
 | HTTP API id | |
 
@@ -37,13 +38,15 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## 2. Web hosting
 
-- [ ] Web bucket: private, Block Public Access on, no static website hosting (OAC needs the REST endpoint)
-- [ ] ACM cert for the app domain (us-east-1, DNS validation); validation CNAME at Namecheap
-- [ ] CloudFront distribution: origin = web bucket with OAC, default root object `index.html`,
+- [x] Web bucket: private, Block Public Access on, no static website hosting (OAC needs the REST endpoint)
+- [x] ACM cert for the app domain (us-east-1, DNS validation); validation CNAME at Namecheap
+- [x] CloudFront distribution (Free flat-rate plan): origin = web bucket with OAC, default root object `index.html`,
       alias = app domain, bucket policy updated to allow the distribution only
-- [ ] SPA fallback: custom error responses 403/404 → `/index.html` (200), or a CloudFront Function
-- [ ] Upload a placeholder `index.html`; DNS CNAME app domain → distribution domain
-- [ ] CDK: `Web` stack (leave the ACM validation CNAME in place)
+- [x] SPA routing: CloudFront Function `bitewise-sls-spa-rewrite` (cloudfront-js-2.0, viewer request on the
+      default behavior; source `infra/functions/spa-rewrite.js`) maps `/x` and `/x/` → `/x/index.html`.
+      Not custom error responses: they apply distribution-wide and would swallow the API's 403/404s.
+- [x] Upload a placeholder `index.html`; DNS CNAME app domain → distribution domain
+- [x] CDK: `Web` stack (leave the ACM validation CNAME in place)
 
 ## 3. Auth (Cognito)
 
@@ -79,7 +82,8 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## 5. Frontend
 
-- [ ] New static-export Next.js app in `web/`, port pages/components from `bitewise-frontend`
+- [ ] New static-export Next.js app in `web/`, port pages/components from `bitewise-frontend`;
+      `trailingSlash: true` (the SPA rewrite Function expects `/x/index.html` files)
 - [ ] Fetch client + TanStack Query, Amplify Auth, client-side guard on dashboard
 - [ ] Build-time env: API URL, pool/client ids, Cognito domain, avatar URL
 - [ ] Deploy: `next build` → upload `out/` to the web bucket → CloudFront invalidation `/*`
