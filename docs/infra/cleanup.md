@@ -28,8 +28,8 @@ Keep (shared with the EC2 app): SES identity `rolandfuest.com`, SNS topic `bitew
 
 ## 3. Auth
 
-- [ ] Cognito domain (must go before the pool)
-- [ ] User Pool (app client, Google IdP, triggers go with it)
+- [ ] Cognito domain, generated prefix (must go before the pool)
+- [ ] User Pool (no deletion protection; app client, Google IdP, triggers go with it)
 - [ ] Trigger Lambdas (custom message, post-confirmation, pre-sign-up) + roles + log groups
 - [ ] Google OAuth client in Google Cloud console
 
