@@ -170,7 +170,8 @@ New static-export app in `web/`, ported page by page from `bitewise-frontend`.
 - Deploy: `next build` → upload `out/` → CloudFront invalidation.
 
 Accepted downgrade: tokens readable by JS (localStorage) instead of httpOnly cookies.
-Mitigated by short access-token lifetime + CSP. Revisit with a token-handler (BFF) Lambda if needed.
+Mitigated by short access-token lifetime + CSP. Revisit with a token-handler (BFF) Lambda if needed; see
+[Follow-up: httpOnly cookies via a BFF](#follow-up-httponly-cookies-via-a-bff).
 
 ## Avatars
 
@@ -222,6 +223,36 @@ Mitigated by short access-token lifetime + CSP. Revisit with a token-handler (BF
 
 vs current EC2 stack ≈ $12/month. Avoid: NAT Gateway (~$33), standalone WAF (~$6+),
 provisioned concurrency, customer-managed KMS keys, unlimited log retention.
+
+## Follow-up: httpOnly cookies via a BFF
+
+Possible later improvement that removes the localStorage token downgrade. Contained change:
+nothing in the current design blocks it.
+
+Adds (BFF = backend for frontend, a small server-side piece that holds the tokens):
+- Token-handler Lambda behind CloudFront, e.g. on `/auth/*`. Runs the OAuth code exchange with
+  Cognito itself, using a confidential app client (with a secret, which a server can keep).
+  Stores tokens server-side (e.g. DynamoDB) or encrypted in the cookie; gives the browser an
+  httpOnly, Secure, SameSite session cookie.
+- `/api/*` authenticates by cookie. Something turns it back into an access token: a Lambda
+  authorizer, or the BFF proxying API calls with the Bearer header. The current JWT authorizer
+  expects a Bearer header, so this is the main infra change.
+- CSRF protection: browsers attach cookies automatically, so SameSite plus a CSRF token or header
+  check become necessary.
+
+Stays the same:
+- Resource Lambdas: Owner still comes from the `sub` claim, however the token arrived.
+- DynamoDB data model and API paths.
+- Cognito User Pool and users; nobody re-registers.
+
+Frontend changes:
+- Amplify sign-in calls become redirects or calls to the BFF. Own sign-in pages calling Amplify
+  `signIn` (SRP in the browser) don't fit as-is: either the BFF does the auth calls server-side,
+  or sign-in goes through the Cognito hosted flow.
+- The fetch client drops the Bearer header and sends `credentials: 'include'`.
+
+To keep the switch cheap: all token handling lives behind one fetch client and one small auth
+module in `web/`, so the migration touches those two places, not every page.
 
 ## Open questions
 
