@@ -13,7 +13,8 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 | Item | Value |
 | --- | --- |
 | Domain (dev) | `sls.bitewise.rolandfuest.com` (DNS: Namecheap) |
-| Repo | `bitewise-sls` |
+| Repo | `bitewise-sls` (bun workspaces) |
+| CDK stacks | `bitewise-sls-dev-{data,auth,api,web}` |
 | Table | `bitewise-dev` |
 | Web bucket | |
 | Avatar bucket | |
@@ -23,8 +24,8 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## 0. Repo + CDK bootstrap
 
-- [ ] Monorepo: `infra/`, `api/`, `web/`, `shared/`, workspace config, shared `tsconfig`
-- [ ] CDK app skeleton in `infra/`; `cdk synth` runs clean
+- [x] Monorepo: `infra/`, `api/`, `web/`, `shared/`, workspace config, shared `tsconfig`
+- [x] CDK app skeleton in `infra/`; `cdk synth` runs clean
 - `cdk bootstrap` (creates the `CDKToolkit` stack) is only needed before the first `cdk deploy`
 
 ## 1. Data

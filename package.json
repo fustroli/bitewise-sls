@@ -1,0 +1,12 @@
+{
+  "name": "bitewise-sls",
+  "private": true,
+  "workspaces": ["infra", "api", "shared", "web"],
+  "scripts": {
+    "synth": "bun run --filter @bitewise/infra synth",
+    "typecheck": "bun run --filter '*' typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}

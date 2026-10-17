@@ -1,0 +1,8 @@
+{
+  "name": "@bitewise/web",
+  "private": true,
+  "description": "Placeholder: the static-export Next.js app replaces this in runbook section 5.",
+  "dependencies": {
+    "@bitewise/shared": "workspace:*"
+  }
+}

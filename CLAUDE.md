@@ -28,8 +28,8 @@ of truth for behavior.
 
 - Keep their API paths, query params, response shapes and error messages, unless
   `docs/plan.md` says otherwise. Ids change from int to ULID.
-- Domain terms come from `../bitewise-backend/CONTEXT.md` (Owner, Owned resource, Meal
-  ingredient, Calorie target, Macro plan, …). Use them in code and docs.
+- Domain terms (Owner, Owned resource, Meal ingredient, Calorie target, Macro plan, …) come from
+  `CONTEXT.md`, copied from `../bitewise-backend`. Use them in code and docs.
 - The Owner always comes from the JWT `sub`, never from the request.
 
 ## Git

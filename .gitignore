@@ -1,0 +1,15 @@
+node_modules/
+*.tsbuildinfo
+
+# CDK
+cdk.out/
+cdk.context.json
+
+# Next.js
+.next/
+out/
+
+# Secrets
+.env*
+!.env.example
+*.pem

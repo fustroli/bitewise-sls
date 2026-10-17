@@ -1,0 +1,9 @@
+{
+  "name": "@bitewise/api",
+  "private": true,
+  "type": "module",
+  "description": "Placeholder: resource Lambdas land here in runbook section 4.",
+  "dependencies": {
+    "@bitewise/shared": "workspace:*"
+  }
+}

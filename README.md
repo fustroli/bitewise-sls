@@ -4,7 +4,7 @@ Serverless version of BiteWise, the meal planner (Ingredients → Meals → Meal
 totals against daily targets). It is a rebuild of the EC2 app (`bitewise-backend` +
 `bitewise-frontend`) and runs side by side with it. It is also practice for the AWS SAA exam.
 
-**Status:** planning done; nothing built yet.
+**Status:** monorepo + empty CDK stacks (runbook section 0); no AWS resources yet.
 
 ## Architecture
 
@@ -25,8 +25,10 @@ Details are in [`docs/plan.md`](docs/plan.md).
 | `web/` | Static-export Next.js SPA |
 | `shared/` | zod schemas and types used by `api/` and `web/` |
 | `docs/` | Plan, runbook, cleanup |
+| `CONTEXT.md` | Domain glossary, copied from `bitewise-backend` |
 
-Only `docs/` exists so far.
+bun workspaces: run `bun install` once at the root. `bun run synth` renders the CDK templates into
+`infra/cdk.out/`; `bun run typecheck` checks every package.
 
 ## How it's built
 
