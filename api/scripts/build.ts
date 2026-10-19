@@ -3,13 +3,19 @@
 import { rmSync } from 'node:fs';
 import { build } from 'esbuild';
 
-const FUNCTIONS = ['custom-message', 'post-confirmation', 'pre-sign-up'];
+// Zip name → entry file under src/
+const FUNCTIONS: Record<string, string> = {
+  'custom-message': 'triggers/custom-message.ts',
+  'post-confirmation': 'triggers/post-confirmation.ts',
+  'pre-sign-up': 'triggers/pre-sign-up.ts',
+  ingredients: 'handlers/ingredients.ts',
+};
 
 rmSync('dist', { recursive: true, force: true });
 
-for (const name of FUNCTIONS) {
+for (const [name, entry] of Object.entries(FUNCTIONS)) {
   await build({
-    entryPoints: [`src/triggers/${name}.ts`],
+    entryPoints: [`src/${entry}`],
     outfile: `dist/${name}/index.mjs`,
     bundle: true,
     platform: 'node',

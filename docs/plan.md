@@ -79,8 +79,8 @@ How the domain rules map:
 - **Lists**: a User's data is small, so a list `Query`s every item of the type
   (`begins_with(SK, 'ING#')`, following `LastEvaluatedKey`), then filters, sorts and slices in the
   Lambda. That keeps today's contract: `limit` 1–100 (default 20), `offset`, `orderBy` whitelist
-  (Ingredient: name, 7 nutrients, unit, createdAt, updatedAt; Meal / Meal plan: name, createdAt,
-  updatedAt), `orderDirection`, `search` (accent-insensitive substring on name), response
+  (Ingredient: name, 7 nutrients, unit, createTimeStamp, updateTimeStamp; Meal / Meal plan: name,
+  createTimeStamp, updateTimeStamp: today's response names, stored as `createdAt`/`updatedAt`), `orderDirection`, `search` (accent-insensitive substring on name), response
   `{data, count}`. Revisit (GSI + cursor) only if a User ever has thousands of items.
 - **Option lists**: same `Query` with a `ProjectionExpression`, sorted by name then id.
   Ingredient `{id, name, unit}`, Meal `{id, name}`, Meal plan `{id, name, mealIds}`.

@@ -23,8 +23,10 @@ Keep (shared with the EC2 app): SES identity `rolandfuest.com`, SNS topic `bitew
 
 ## 4. API
 
-- [ ] HTTP API (routes, authorizer, integrations, stage go with it)
-- [ ] Lambdas (ingredients, meals, meal plans, users) + execution roles + log groups
+- [ ] HTTP API `bitewise-sls` (`31mhrbd81j`; routes, authorizer `cognito`, integrations, stage go with it)
+- [ ] Lambdas `bitewise-sls-{ingredients,meals,meal-plans,users}` + execution roles + `/aws/lambda/*` log groups
+- [ ] Their IAM roles (inline policies go with them): `bitewise-sls-ingredients-role-x0k1xwb7`
+- [ ] CloudFront `/api/*` behavior + API origin (removed with the distribution in step 2)
 
 ## 3. Auth
 
