@@ -7,3 +7,6 @@ export type IngredientItem = OwnedItem & Record<Nutrient, number> & { unit: Unit
 
 /** `ingredients` is ordered: array position is the Meal ingredient's position. */
 export type MealItem = OwnedItem & { ingredients: MealIngredientInput[] };
+
+/** `mealIds` is ordered: array position is the Meal's position in the plan. */
+export type MealPlanItem = OwnedItem & { mealIds: string[] };

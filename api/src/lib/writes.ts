@@ -67,6 +67,13 @@ export function updateUsedBy(owner: string, kind: Kind, memberIds: Iterable<stri
   }));
 }
 
+/** Members to add to and remove from usedBy when a composition changes from `before` to `after`. */
+export function memberChanges(before: readonly string[], after: readonly string[]) {
+  const was = new Set(before);
+  const is = new Set(after);
+  return { added: after.filter((id) => !was.has(id)), removed: before.filter((id) => !is.has(id)) };
+}
+
 /** "You already have an ingredient named X." */
 export function nameTaken(label: string, name: string) {
   const article = /^[aeiou]/i.test(label) ? 'an' : 'a';

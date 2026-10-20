@@ -10,6 +10,7 @@ const FUNCTIONS: Record<string, string> = {
   'pre-sign-up': 'triggers/pre-sign-up.ts',
   ingredients: 'handlers/ingredients.ts',
   meals: 'handlers/meals.ts',
+  'meal-plans': 'handlers/meal-plans.ts',
 };
 
 rmSync('dist', { recursive: true, force: true });

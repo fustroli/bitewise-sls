@@ -96,7 +96,9 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 - [x] `/api/meal`: Lambda `bitewise-sls-meals` (same settings, inline policy `meals-table` = same actions as
       ingredients, since it also updates Ingredients' `usedBy`), routes `ANY /api/meal` + `/{proxy+}` with
       the `cognito` authorizer
-- [ ] Repeat for `/api/meal-plan`, `/api/users/me` (users Lambda also needs
+- [x] `/api/meal-plan`: Lambda `bitewise-sls-meal-plans` (same settings, inline policy `meal-plans-table`,
+      also updates Meals' `usedBy`), routes `ANY /api/meal-plan` + `/{proxy+}` sharing one integration
+- [ ] Repeat for `/api/users/me` (users Lambda also needs
       `cognito-idp:AdminDeleteUser` and S3 on the avatar bucket)
 - [ ] Log retention 14 days on every `/aws/lambda/*` group
 - [ ] CDK: `Api` stack (`NodejsFunction`)
@@ -130,6 +132,9 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## Gotchas hit
 
+- The route's "Choose an existing integration" dropdown lists integrations (API → function links), not
+  functions: a new Lambda needs "Create and attach an integration" once, then the second route reuses it.
+  Creating it twice leaves a duplicate integration (happened for ingredients).
 - A 401 from the HTTP API explains itself in the `www-authenticate` header (`curl -i`). "token contains an
   invalid number of segments" meant the shell's `AUTH` variable still held `Bearer null` from a failed
   code exchange; rebuild `AUTH` after every new `TOKEN`.

@@ -6,16 +6,16 @@ import {
   listQuerySchema,
   MEAL_SORTABLE,
   type MealIngredientInput,
-  NUTRIENTS,
-  type Nutrient,
   updateMealSchema,
 } from '@bitewise/shared';
 import { ulid } from 'ulidx';
 import { ddb, TABLE_NAME } from '../lib/ddb';
 import { type ApiResult, json, jsonBody, noContent, notFound } from '../lib/http';
 import type { IngredientItem, MealItem } from '../lib/items';
+import { ingredientIds, ingredientsOf, serializeMeal as serialize } from '../lib/meal-view';
 import {
   batchGetOwned,
+  requireAllOwned,
   cancellationReasons,
   getOwned,
   itemKey,
@@ -31,6 +31,7 @@ import { parse, parseId } from '../lib/validation';
 import {
   assertUnused,
   claimName,
+  memberChanges,
   nameTaken,
   putNew,
   releaseName,
@@ -49,44 +50,6 @@ const SORT_FIELD: Record<(typeof MEAL_SORTABLE)[number], keyof MealItem> = { nam
 /** The EC2 app stored quantities as decimal(10,2). */
 function roundQuantities(members: MealIngredientInput[]): MealIngredientInput[] {
   return members.map(({ ingredientId, quantity }) => ({ ingredientId, quantity: Math.round(quantity * 100) / 100 }));
-}
-
-const memberIds = (members: MealIngredientInput[]) => members.map((member) => member.ingredientId);
-
-/** Today's shape: Meal ingredients in position order, each with its Ingredient's name, nutrients and unit. */
-function serialize(meal: MealItem, ingredients: Map<string, IngredientItem>) {
-  return {
-    id: meal.id,
-    name: meal.name,
-    mealIngredients: meal.ingredients.map(({ ingredientId, quantity }) => {
-      const ingredient = ingredients.get(ingredientId);
-      return {
-        ingredientId,
-        ingredientName: ingredient?.name,
-        quantity,
-        ...(Object.fromEntries(NUTRIENTS.map((n) => [n, ingredient?.[n]])) as Record<Nutrient, number>),
-        unit: ingredient?.unit,
-      };
-    }),
-  };
-}
-
-async function ingredientsById(owner: string, ids: string[]): Promise<Map<string, IngredientItem>> {
-  const ingredients = await batchGetOwned<IngredientItem>(owner, 'ING', ids);
-  return new Map(ingredients.map((ingredient) => [ingredient.id, ingredient]));
-}
-
-/** The Ingredients of these Meals, fetched once for all of them. */
-function ingredientsOf(owner: string, meals: MealItem[]) {
-  return ingredientsById(owner, meals.flatMap((meal) => memberIds(meal.ingredients)));
-}
-
-/** The Owner's Ingredients with these ids; any other id is a 404, like the EC2 app. */
-async function requireIngredients(owner: string, ids: string[]): Promise<Map<string, IngredientItem>> {
-  const found = await ingredientsById(owner, ids);
-  const missing = ids.filter((id) => !found.has(id));
-  if (missing.length) throw notFound(`No ingredient found with id ${missing.join(', ')}.`);
-  return found;
 }
 
 async function list({ event, owner }: Request) {
@@ -114,8 +77,8 @@ async function getOne({ owner, params }: Request) {
 async function create({ event, owner }: Request) {
   const data = parse(createMealSchema, jsonBody(event));
   const members = roundQuantities(data.mealIngredients);
-  const ids = memberIds(members);
-  const ingredients = await requireIngredients(owner, ids);
+  const ids = members.map((member) => member.ingredientId);
+  const ingredients = await requireAllOwned<IngredientItem>(owner, 'ING', ids, 'ingredient');
 
   const now = new Date().toISOString();
   const id = ulid();
@@ -152,12 +115,9 @@ async function update({ event, owner, params }: Request, retried = false): Promi
 
   const members = patch.mealIngredients ? roundQuantities(patch.mealIngredients) : current.ingredients;
   const ingredients = patch.mealIngredients
-    ? await requireIngredients(owner, memberIds(members))
+    ? await requireAllOwned<IngredientItem>(owner, 'ING', ingredientIds({ ingredients: members }), 'ingredient')
     : await ingredientsOf(owner, [current]);
-  const before = new Set(memberIds(current.ingredients));
-  const after = new Set(memberIds(members));
-  const added = [...after].filter((ingredientId) => !before.has(ingredientId));
-  const removed = [...before].filter((ingredientId) => !after.has(ingredientId));
+  const { added, removed } = memberChanges(ingredientIds(current), ingredientIds({ ingredients: members }));
   const renamed = patch.name !== undefined && nameKey(patch.name) !== nameKey(current.name);
 
   const now = new Date().toISOString();
@@ -210,7 +170,7 @@ async function removeOwned(owner: string, id: string, retried = false): Promise<
         },
       },
       releaseName(owner, 'MEAL', current.name),
-      ...updateUsedBy(owner, 'ING', memberIds(current.ingredients), id, 'DELETE'),
+      ...updateUsedBy(owner, 'ING', ingredientIds(current), id, 'DELETE'),
     ]);
   } catch (error) {
     if (cancellationReasons(error)?.[0] === 'ConditionalCheckFailed' && !retried) return removeOwned(owner, id, true);

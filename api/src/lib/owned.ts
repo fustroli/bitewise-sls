@@ -109,6 +109,20 @@ export async function batchGetOwned<T extends object>(
 // List requests sort by the EC2 app's response names; items store createdAt/updatedAt.
 export const TIMESTAMP_SORT_FIELDS = { createTimeStamp: 'createdAt', updateTimeStamp: 'updatedAt' } as const;
 
+/** batchGetOwned keyed by id. */
+export async function mapById<T extends { id: string }>(owner: string, kind: Kind, ids: readonly string[]): Promise<Map<string, T>> {
+  const items = await batchGetOwned<T>(owner, kind, ids);
+  return new Map(items.map((item) => [item.id, item]));
+}
+
+/** The Owner's items with these ids; any other id is a 404 listing them, like the EC2 app. */
+export async function requireAllOwned<T extends { id: string }>(owner: string, kind: Kind, ids: readonly string[], label: string) {
+  const found = await mapById<T>(owner, kind, ids);
+  const missing = ids.filter((id) => !found.has(id));
+  if (missing.length) throw notFound(`No ${label} found with id ${missing.join(', ')}.`);
+  return found;
+}
+
 const collator = new Intl.Collator('en', { sensitivity: 'base', numeric: true });
 
 function compare(a: unknown, b: unknown): number {

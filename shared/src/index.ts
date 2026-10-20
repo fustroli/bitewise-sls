@@ -2,5 +2,6 @@
 export * from './constants';
 export * from './ingredient';
 export * from './meal';
+export * from './meal-plan';
 export * from './pagination';
 export * from './rules';
