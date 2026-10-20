@@ -139,8 +139,8 @@ change from int to ULID string.
 | Sign-in (2 steps: email, password) | `signIn` (UI keeps 2 steps) |
 | Refresh rotation in `proxy.ts` | Amplify refreshes tokens |
 | Sign-out of one Session | `signOut` (revokes the refresh token) |
-| Password reset link (1 h), signs out everywhere | `resetPassword` + code; `GlobalSignOut` after confirm |
-| Change password, signs out other Sessions, mails "password changed" | `updatePassword` + global sign-out; **no mail** |
+| Password reset link (1 h), signs out everywhere | `resetPassword` + code; no global sign-out (new app, no sessions to protect) |
+| Change password, signs out other Sessions, mails "password changed" | `updatePassword`, session stays; **no mail**, no global sign-out |
 | Email change: password + link to new address, cancel link to old, notice to old | `updateUserAttributes` + code to new address with "keep original value active until verified"; **no mail to old address, no cancel link**; UI asks for the password and re-authenticates first |
 | Google-only user sets a first password via reset | **Not supported** for federated users |
 

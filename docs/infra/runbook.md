@@ -107,6 +107,8 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## 5. Frontend
 
+Plan, decisions and port order: `docs/frontend-handover.md`.
+
 - [ ] New static-export Next.js app in `web/`, port pages/components from `bitewise-frontend`;
       `trailingSlash: true` (the SPA rewrite Function expects `/x/index.html` files)
 - [ ] Fetch client + TanStack Query, Amplify Auth, client-side guard on dashboard
