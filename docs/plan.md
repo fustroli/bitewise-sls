@@ -92,7 +92,7 @@ How the domain rules map:
   ingredients). Nutrition totals stay on the frontend, as today.
 - **Statistics**: three `Query`s with `Select: COUNT`.
 - **Deletes are hard.** Account deletion = query all `USER#<sub>` items + the username sentinel →
-  batch delete, delete avatar objects, `AdminDeleteUser`. (Today owned resources are kept.)
+  batch delete, delete avatar objects, `DeleteUser` with the caller's access token (no IAM needed). (Today owned resources are kept.)
 
 ## API
 

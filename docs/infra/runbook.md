@@ -98,8 +98,9 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
       the `cognito` authorizer
 - [x] `/api/meal-plan`: Lambda `bitewise-sls-meal-plans` (same settings, inline policy `meal-plans-table`,
       also updates Meals' `usedBy`), routes `ANY /api/meal-plan` + `/{proxy+}` sharing one integration
-- [ ] Repeat for `/api/users/me` (users Lambda also needs
-      `cognito-idp:AdminDeleteUser` and S3 on the avatar bucket)
+- [x] `/api/users/me`: Lambda `bitewise-sls-users`, env `TABLE_NAME`, inline policy `users-table` (`Query`,
+      `GetItem`, `PutItem`, `UpdateItem`, `DeleteItem`, `BatchWriteItem`); routes `ANY /api/users/me` + `/{proxy+}`.
+      No Cognito IAM: `GetUser`/`DeleteUser` act with the caller's access token. S3 on the avatar bucket in section 6
 - [ ] Log retention 14 days on every `/aws/lambda/*` group
 - [ ] CDK: `Api` stack (`NodejsFunction`)
 

@@ -11,6 +11,7 @@ const FUNCTIONS: Record<string, string> = {
   ingredients: 'handlers/ingredients.ts',
   meals: 'handlers/meals.ts',
   'meal-plans': 'handlers/meal-plans.ts',
+  users: 'handlers/users.ts',
 };
 
 rmSync('dist', { recursive: true, force: true });

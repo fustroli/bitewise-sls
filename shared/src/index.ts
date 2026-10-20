@@ -4,4 +4,5 @@ export * from './ingredient';
 export * from './meal';
 export * from './meal-plan';
 export * from './pagination';
+export * from './profile';
 export * from './rules';

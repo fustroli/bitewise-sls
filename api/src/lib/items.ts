@@ -10,3 +10,12 @@ export type MealItem = OwnedItem & { ingredients: MealIngredientInput[] };
 
 /** `mealIds` is ordered: array position is the Meal's position in the plan. */
 export type MealPlanItem = OwnedItem & { mealIds: string[] };
+
+/** `PK = USER#<sub>, SK = PROFILE`; created by the post-confirmation trigger, groups added on PATCH. */
+export type ProfileItem = Omit<OwnedItem, 'id' | 'name' | 'usedBy'> & {
+  personalInformation?: Record<string, unknown>;
+  socialProfiles?: Record<string, unknown>;
+  bodyStats?: Record<string, unknown>;
+  targets?: Record<string, unknown>;
+  avatarKey?: string;
+};
