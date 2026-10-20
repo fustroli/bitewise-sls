@@ -102,7 +102,8 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
       `GetItem`, `PutItem`, `UpdateItem`, `DeleteItem`, `BatchWriteItem`); routes `ANY /api/users/me` + `/{proxy+}`.
       No Cognito IAM: `GetUser`/`DeleteUser` act with the caller's access token. S3 on the avatar bucket in section 6
 - [ ] Log retention 14 days on every `/aws/lambda/*` group
-- [ ] CDK: `Api` stack (`NodejsFunction`)
+- [x] CDK: `Api` stack (four `BitewiseFunction`s, one integration each, 8 routes with the JWT authorizer,
+      `$default` stage throttling) + `/api/*` behavior in the `Web` stack
 
 ## 5. Frontend
 
@@ -133,6 +134,8 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 ## Gotchas hit
 
+- CDK: `httpApi.addStage()` with `stageName: '$default'` renders the API resource twice ("section 'Resources'
+  already contains …" at synth). A standalone `new HttpStage(...)` works.
 - The route's "Choose an existing integration" dropdown lists integrations (API → function links), not
   functions: a new Lambda needs "Create and attach an integration" once, then the second route reuses it.
   Creating it twice leaves a duplicate integration (happened for ingredients).

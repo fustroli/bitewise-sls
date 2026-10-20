@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import { CfnOutput, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
+import type { HttpApi } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import {
   AllowedMethods,
@@ -10,15 +11,19 @@ import {
   FunctionEventType,
   FunctionRuntime,
   HttpVersion,
+  OriginProtocolPolicy,
+  OriginRequestPolicy,
   ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
-import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
+import { HttpOrigin, S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { BlockPublicAccess, Bucket, BucketEncryption, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
 import type { Construct } from 'constructs';
 
 export interface WebStackProps extends StackProps {
   /** App domain, e.g. sls.bitewise.rolandfuest.com. DNS lives at Namecheap. */
   domainName: string;
+  /** Served under /api/* on the same domain, so the browser needs no CORS. */
+  api: HttpApi;
 }
 
 /**
@@ -64,6 +69,21 @@ export class WebStack extends Stack {
         cachePolicy: CachePolicy.CACHING_OPTIMIZED,
         compress: true,
         functionAssociations: [{ function: spaRewrite, eventType: FunctionEventType.VIEWER_REQUEST }],
+      },
+      additionalBehaviors: {
+        '/api/*': {
+          origin: new HttpOrigin(`${props.api.apiId}.execute-api.${this.region}.${this.urlSuffix}`, {
+            protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
+          }),
+          // Not "redirect": a redirected POST loses its body
+          viewerProtocolPolicy: ViewerProtocolPolicy.HTTPS_ONLY,
+          allowedMethods: AllowedMethods.ALLOW_ALL,
+          // Never cache per-user responses. With caching off, forwarding all viewer headers is what
+          // passes Authorization; Host is left out because API Gateway routes on its own host name.
+          cachePolicy: CachePolicy.CACHING_DISABLED,
+          originRequestPolicy: OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+          // No SPA rewrite here: that's for the default behavior only
+        },
       },
       domainNames: [props.domainName],
       certificate,

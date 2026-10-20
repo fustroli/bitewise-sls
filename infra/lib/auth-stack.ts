@@ -8,6 +8,7 @@ import {
   OAuthScope,
   ProviderAttribute,
   UserPool,
+  type UserPoolClient,
   UserPoolClientIdentityProvider,
   UserPoolEmail,
   UserPoolIdentityProviderGoogle,
@@ -35,6 +36,7 @@ export interface AuthStackProps extends StackProps {
  */
 export class AuthStack extends Stack {
   readonly userPool: UserPool;
+  readonly client: UserPoolClient;
 
   constructor(scope: Construct, id: string, props: AuthStackProps) {
     super(scope, id, props);
@@ -109,7 +111,7 @@ export class AuthStack extends Stack {
       attributeMapping: { email: ProviderAttribute.GOOGLE_EMAIL, emailVerified: ProviderAttribute.GOOGLE_EMAIL_VERIFIED },
     });
 
-    const client = this.userPool.addClient('WebClient', {
+    const client = (this.client = this.userPool.addClient('WebClient', {
       userPoolClientName: 'bitewise-sls-web',
       generateSecret: false,
       // SRP only; refresh is always allowed
@@ -126,7 +128,7 @@ export class AuthStack extends Stack {
       refreshTokenValidity: Duration.days(30),
       preventUserExistenceErrors: true,
       enableTokenRevocation: true,
-    });
+    }));
     client.node.addDependency(google);
 
     // Default managed login style; the app uses its own pages, but the Google redirect passes through.
