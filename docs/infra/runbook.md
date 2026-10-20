@@ -93,7 +93,10 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
       viewer HTTPS only, all methods, `CachingDisabled`, origin request policy `AllViewerExceptHostHeader`
       (API Gateway rejects a foreign Host; forwarding all viewer headers is what passes `Authorization`),
       no function association
-- [ ] Repeat for `/api/meal`, `/api/meal-plan`, `/api/users/me` (users Lambda also needs
+- [x] `/api/meal`: Lambda `bitewise-sls-meals` (same settings, inline policy `meals-table` = same actions as
+      ingredients, since it also updates Ingredients' `usedBy`), routes `ANY /api/meal` + `/{proxy+}` with
+      the `cognito` authorizer
+- [ ] Repeat for `/api/meal-plan`, `/api/users/me` (users Lambda also needs
       `cognito-idp:AdminDeleteUser` and S3 on the avatar bucket)
 - [ ] Log retention 14 days on every `/aws/lambda/*` group
 - [ ] CDK: `Api` stack (`NodejsFunction`)

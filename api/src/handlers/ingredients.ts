@@ -1,5 +1,5 @@
 import { Logger } from '@aws-lambda-powertools/logger';
-import { TransactWriteCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
 import {
   createIngredientSchema,
@@ -9,12 +9,11 @@ import {
   listQuerySchema,
   NUTRIENTS,
   type Nutrient,
-  type Unit,
   updateIngredientSchema,
 } from '@bitewise/shared';
 import { ulid } from 'ulidx';
 import { ddb, TABLE_NAME } from '../lib/ddb';
-import { badRequest, conflict, json, jsonBody, noContent } from '../lib/http';
+import { type ApiResult, badRequest, json, jsonBody, noContent } from '../lib/http';
 import {
   batchGetOwned,
   cancellationReasons,
@@ -22,19 +21,19 @@ import {
   itemKey,
   listPage,
   nameKey,
-  nameSentinelKey,
-  type OwnedItem,
   ownerKey,
   queryAll,
   sortItems,
+  TIMESTAMP_SORT_FIELDS,
 } from '../lib/owned';
+import type { IngredientItem } from '../lib/items';
 import { type Request, router } from '../lib/router';
 import { parse, parseId } from '../lib/validation';
+import { assertUnused, claimName, nameTaken, putNew, releaseName, setFields, transact } from '../lib/writes';
 
 const logger = new Logger({ serviceName: 'ingredients' });
 const LABEL = 'ingredient';
 
-type IngredientItem = OwnedItem & Record<Nutrient, number> & { unit: Unit };
 
 const listQuery = listQuerySchema(INGREDIENT_SORTABLE);
 
@@ -43,8 +42,7 @@ const SORT_FIELD: Record<(typeof INGREDIENT_SORTABLE)[number], keyof IngredientI
   ...(Object.fromEntries(NUTRIENTS.map((n) => [n, n])) as Record<Nutrient, Nutrient>),
   name: 'name',
   unit: 'unit',
-  createTimeStamp: 'createdAt',
-  updateTimeStamp: 'updatedAt',
+  ...TIMESTAMP_SORT_FIELDS,
 };
 
 /** The EC2 app stored nutrients as decimal(10,1). */
@@ -93,77 +91,36 @@ async function create({ event, owner }: Request) {
   const item: IngredientItem = { PK: ownerKey(owner), SK: itemKey('ING', id), id, ...data, createdAt: now, updatedAt: now };
 
   try {
-    await ddb.send(
-      new TransactWriteCommand({
-        TransactItems: [
-          { Put: { TableName: TABLE_NAME, Item: item, ConditionExpression: 'attribute_not_exists(PK)' } },
-          {
-            Put: {
-              TableName: TABLE_NAME,
-              Item: { PK: item.PK, SK: nameSentinelKey('ING', data.name), id },
-              ConditionExpression: 'attribute_not_exists(PK)',
-            },
-          },
-        ],
-      }),
-    );
+    await transact([putNew(item), claimName(owner, 'ING', data.name, id)]);
   } catch (error) {
-    if (cancellationReasons(error)?.[1] === 'ConditionalCheckFailed') throw duplicateName(data.name);
+    if (cancellationReasons(error)?.[1] === 'ConditionalCheckFailed') throw nameTaken(LABEL, data.name);
     throw error;
   }
   return json(201, serialize(item, owner));
 }
 
-async function update({ event, owner, params }: Request) {
+async function update({ event, owner, params }: Request): Promise<ApiResult> {
   const id = parseId(params.id);
   const patch = roundNutrients(parse(updateIngredientSchema, jsonBody(event)));
   const current = await getOwned<IngredientItem>(owner, 'ING', id, LABEL);
   // Checked on the merged Ingredient: a PATCH may send only one of the two
   const merged: IngredientItem = { ...current, ...patch };
   if (!fatIsConsistent(merged)) throw badRequest([FAT_MESSAGE]);
-
-  const fields = Object.entries(patch).filter(([, value]) => value !== undefined);
-  if (!fields.length) return json(200, serialize(current, owner));
+  if (!Object.values(patch).some((value) => value !== undefined)) return json(200, serialize(current, owner));
 
   const now = new Date().toISOString();
-  // SET only the sent fields: a concurrent Meal write may be changing usedBy.
-  const change = {
-    TableName: TABLE_NAME,
-    Key: { PK: current.PK, SK: current.SK },
-    UpdateExpression: `SET ${[...fields.map((_, i) => `#f${i} = :v${i}`), '#updatedAt = :now'].join(', ')}`,
-    ConditionExpression: 'attribute_exists(PK)',
-    ExpressionAttributeNames: {
-      ...Object.fromEntries(fields.map(([key], i) => [`#f${i}`, key])),
-      '#updatedAt': 'updatedAt',
-    },
-    ExpressionAttributeValues: { ...Object.fromEntries(fields.map(([, value], i) => [`:v${i}`, value])), ':now': now },
-  };
-
+  const change = setFields(current, patch, now);
   const renamed = patch.name !== undefined && nameKey(patch.name) !== nameKey(current.name);
   try {
     if (renamed) {
-      await ddb.send(
-        new TransactWriteCommand({
-          TransactItems: [
-            { Update: change },
-            { Delete: { TableName: TABLE_NAME, Key: { PK: current.PK, SK: nameSentinelKey('ING', current.name) } } },
-            {
-              Put: {
-                TableName: TABLE_NAME,
-                Item: { PK: current.PK, SK: nameSentinelKey('ING', patch.name!), id },
-                ConditionExpression: 'attribute_not_exists(PK)',
-              },
-            },
-          ],
-        }),
-      );
+      await transact([{ Update: change }, releaseName(owner, 'ING', current.name), claimName(owner, 'ING', patch.name!, id)]);
     } else {
       await ddb.send(new UpdateCommand(change));
     }
   } catch (error) {
     const reasons = cancellationReasons(error);
-    if (reasons?.[2] === 'ConditionalCheckFailed') throw duplicateName(patch.name!);
-    // Deleted between the read and the write
+    if (reasons?.[2] === 'ConditionalCheckFailed') throw nameTaken(LABEL, patch.name!);
+    // Deleted between the read and the write: the retry answers 404
     if (reasons?.[0] === 'ConditionalCheckFailed' || error instanceof ConditionalCheckFailedException) {
       return update({ event, owner, params });
     }
@@ -179,43 +136,25 @@ async function remove({ owner, params }: Request) {
 
 async function removeOwned(owner: string, id: string, retried = false): Promise<void> {
   const current = await getOwned<IngredientItem>(owner, 'ING', id, LABEL);
-  await assertUnused(owner, current);
+  await assertUnused(owner, current, 'MEAL', 'This ingredient is used in meals:');
 
   try {
-    await ddb.send(
-      new TransactWriteCommand({
-        TransactItems: [
-          {
-            Delete: {
-              TableName: TABLE_NAME,
-              Key: { PK: current.PK, SK: current.SK },
-              // An empty set is removed from the item, so "no usedBy" means no Meal uses it.
-              ConditionExpression: 'attribute_exists(PK) AND attribute_not_exists(usedBy)',
-            },
-          },
-          { Delete: { TableName: TABLE_NAME, Key: { PK: current.PK, SK: nameSentinelKey('ING', current.name) } } },
-        ],
-      }),
-    );
+    await transact([
+      {
+        Delete: {
+          TableName: TABLE_NAME,
+          Key: { PK: current.PK, SK: current.SK },
+          // An empty set is removed from the item, so "no usedBy" means no Meal uses it.
+          ConditionExpression: 'attribute_exists(PK) AND attribute_not_exists(usedBy)',
+        },
+      },
+      releaseName(owner, 'ING', current.name),
+    ]);
   } catch (error) {
     // A Meal started using it (or it was deleted) after the read: answer from a fresh read
-    if (cancellationReasons(error)?.[0] === 'ConditionalCheckFailed' && !retried) {
-      return removeOwned(owner, id, true);
-    }
+    if (cancellationReasons(error)?.[0] === 'ConditionalCheckFailed' && !retried) return removeOwned(owner, id, true);
     throw error;
   }
-}
-
-/** 409 while any Meal uses the Ingredient. */
-async function assertUnused(owner: string, ingredient: IngredientItem): Promise<void> {
-  if (!ingredient.usedBy?.size) return;
-  const meals = await batchGetOwned<{ id: string; name: string }>(owner, 'MEAL', [...ingredient.usedBy], ['id', 'name']);
-  const names = sortItems(meals, (meal) => meal.id).map((meal) => meal.name);
-  throw conflict(`This ingredient is used in meals: ${names.join(', ')}.`);
-}
-
-function duplicateName(name: string) {
-  return conflict(`You already have an ingredient named ${name}.`);
 }
 
 export const handler = router(

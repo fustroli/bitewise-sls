@@ -23,6 +23,23 @@ export function number(field: string, min: number, max: number) {
     .max(max, { error: `${field} must not be greater than ${max}` });
 }
 
+export function positive(field: string, max: number) {
+  return z
+    .number({
+      error: (issue) =>
+        issue.input === undefined
+          ? `${field} should not be empty`
+          : `${field} must be a number conforming to the specified constraints`,
+    })
+    .positive({ error: `${field} must be a positive number` })
+    .max(max, { error: `${field} must not be greater than ${max}` });
+}
+
+/** An id of another Owned resource. */
+export function id(field: string) {
+  return z.string({ error: `${field} must be a ULID` }).regex(ULID, { error: `${field} must be a ULID` });
+}
+
 export function oneOf<const T extends readonly [string, ...string[]]>(field: string, values: T) {
   return z.enum(values, { error: `${field} must be one of the following values: ${values.join(', ')}` });
 }

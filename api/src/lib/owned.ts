@@ -106,6 +106,9 @@ export async function batchGetOwned<T extends object>(
   return items;
 }
 
+// List requests sort by the EC2 app's response names; items store createdAt/updatedAt.
+export const TIMESTAMP_SORT_FIELDS = { createTimeStamp: 'createdAt', updateTimeStamp: 'updatedAt' } as const;
+
 const collator = new Intl.Collator('en', { sensitivity: 'base', numeric: true });
 
 function compare(a: unknown, b: unknown): number {

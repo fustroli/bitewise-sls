@@ -1,13 +1,10 @@
 import { Logger } from '@aws-lambda-powertools/logger';
-import { ConditionalCheckFailedException, DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { ConditionalCheckFailedException } from '@aws-sdk/client-dynamodb';
+import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import type { PostConfirmationTriggerHandler } from 'aws-lambda';
-import { requireEnv } from '../lib/env';
+import { ddb, TABLE_NAME } from '../lib/ddb';
 
 const logger = new Logger({ serviceName: 'post-confirmation' });
-const TABLE_NAME = requireEnv('TABLE_NAME');
-// Module scope: reused across warm invocations
-const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 
 /**
  * Creates the Profile of a new User (native sign-up confirmed, or a first Google sign-in that

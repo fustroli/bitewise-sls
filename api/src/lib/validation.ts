@@ -7,9 +7,13 @@ export function parse<T extends z.ZodType>(schema: T, input: unknown): z.output<
   const result = schema.safeParse(input);
   if (result.success) return result.data;
   throw badRequest(
-    result.error.issues.flatMap((issue) =>
-      issue.code === 'unrecognized_keys' ? issue.keys.map((key) => `property ${key} should not exist`) : [issue.message],
-    ),
+    result.error.issues.flatMap((issue) => {
+      const messages =
+        issue.code === 'unrecognized_keys' ? issue.keys.map((key) => `property ${key} should not exist`) : [issue.message];
+      // Nested fields get their parent's path, like class-validator: "mealIngredients.0.quantity must be ..."
+      const parent = issue.path.slice(0, issue.code === 'unrecognized_keys' ? undefined : -1).join('.');
+      return parent ? messages.map((message) => `${parent}.${message}`) : messages;
+    }),
   );
 }
 

@@ -43,7 +43,8 @@ export function listQuerySchema<const T extends readonly [string, ...string[]]>(
         .transform((value) => value.split(',').map((id) => id.trim()))
         .pipe(
           z
-            .array(z.string().regex(ULID, { error: 'each value in ids must be a ULID' }))
+            .array(z.string())
+            .refine((ids) => ids.every((id) => ULID.test(id)), { error: 'each value in ids must be a ULID' })
             .min(1, { error: 'ids must contain at least 1 elements' })
             .max(MAX_IDS, { error: `ids must contain no more than ${MAX_IDS} elements` }),
         )

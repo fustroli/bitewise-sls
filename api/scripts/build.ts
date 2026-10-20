@@ -9,6 +9,7 @@ const FUNCTIONS: Record<string, string> = {
   'post-confirmation': 'triggers/post-confirmation.ts',
   'pre-sign-up': 'triggers/pre-sign-up.ts',
   ingredients: 'handlers/ingredients.ts',
+  meals: 'handlers/meals.ts',
 };
 
 rmSync('dist', { recursive: true, force: true });
