@@ -1,0 +1,800 @@
+{
+  "dashboard": {
+    "appbar": {
+      "logout": "Sign out"
+    },
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "ingredients": "Ingredients",
+      "meals": "Meals",
+      "mealPlans": "Meal plans",
+      "compare": "Compare",
+      "account": "Account",
+      "mainNavigation": "Main",
+      "home": "Home",
+      "plans": "Plans",
+      "homeLink": "BiteWise home",
+      "weekPlan": "Week plan"
+    },
+    "bodyMetrics": {
+      "bmi": {
+        "title": "BMI",
+        "description": "Adult WHO classification",
+        "healthyWeight": "Healthy weight for your height: {min} – {max} kg",
+        "categories": {
+          "severeThinness": "Severe thinness",
+          "moderateThinness": "Moderate thinness",
+          "mildThinness": "Mild thinness",
+          "normal": "Normal",
+          "overweight": "Overweight",
+          "obeseClassI": "Obese class I",
+          "obeseClassII": "Obese class II",
+          "obeseClassIII": "Obese class III"
+        },
+        "zones": {
+          "under": "Underweight",
+          "normal": "Normal",
+          "over": "Overweight",
+          "obese": "Obese"
+        },
+        "showTable": "Show WHO table",
+        "hideTable": "Hide WHO table",
+        "marker": "Your BMI: {value}"
+      },
+      "bodyFat": {
+        "title": "Body fat",
+        "description": "US Navy method · ACE categories",
+        "fatMass": "Fat mass",
+        "leanMass": "Lean mass",
+        "kg": "{value} kg",
+        "empty": "Add your sex, height, weight, neck and waist (and hip for women) to see your body fat.",
+        "implausible": "Your measurements don't give a plausible body fat. Is your waist larger than your neck?",
+        "addMeasurements": "Add your measurements",
+        "checkMeasurements": "Check your measurements",
+        "categories": {
+          "essential": "Essential fat",
+          "athletes": "Athletes",
+          "fitness": "Fitness",
+          "average": "Average",
+          "obese": "Obese"
+        },
+        "showTable": "Show categories",
+        "hideTable": "Hide categories",
+        "marker": "Your body fat: {value}"
+      },
+      "calories": {
+        "title": "Calories by goal",
+        "pick": "Pick a row to set your Calorie target.",
+        "kcalPerDay": "kcal/day",
+        "kgPerWeek": "{value} kg/week",
+        "lose": "Lose",
+        "gain": "Gain",
+        "maintenance": "Maintenance",
+        "maintenanceHint": "Keeps your current weight",
+        "loseTargets": {
+          "mild": "Mild weight loss",
+          "normal": "Weight loss",
+          "fast": "Extreme weight loss"
+        },
+        "gainTargets": {
+          "mild": "Mild weight gain",
+          "normal": "Weight gain",
+          "fast": "Fast weight gain"
+        },
+        "targetNames": {
+          "maintenance": "Maintenance",
+          "lose": "Lose {kg} kg/wk",
+          "gain": "Gain {kg} kg/wk"
+        },
+        "picked": "Your target",
+        "belowSafeMinimum": "Below the safe minimum of {min} kcal/day",
+        "empty": "Add your sex, height, weight and Activity level to see your calories.",
+        "dateOfBirthMissing": "Add your date of birth to see your calories.",
+        "goal": "Goal",
+        "ofMaintenance": "{percent} of maintenance",
+        "tickNote": "Tick mark = maintenance ({kcal} kcal/day)."
+      },
+      "macros": {
+        "title": "Macros at maintenance",
+        "titleAtTarget": "Macros at target ({target})",
+        "gramsPerDay": "g/day",
+        "limit": "< {value} g/day",
+        "macros": {
+          "protein": "Protein",
+          "carbs": "Carbs",
+          "fat": "Fat"
+        },
+        "plans": {
+          "balanced": "Balanced",
+          "low_fat": "Low fat",
+          "low_carb": "Low carb",
+          "high_protein": "High protein"
+        },
+        "empty": "Add your sex, height, weight and Activity level to see your macros.",
+        "dateOfBirthMissing": "Add your date of birth to see your macros.",
+        "split": "Split",
+        "ofEnergy": "{percent} of energy",
+        "sugarLimit": "Sugar limit",
+        "saturatedFatLimit": "Saturated fat limit"
+      },
+      "addBodyStats": "Add Body stats",
+      "addDateOfBirth": "Add date of birth",
+      "you": "{label} · you"
+    },
+    "description": "Your daily targets and body stats at a glance.",
+    "summary": {
+      "title": "Today’s summary",
+      "description": "Based on your body stats. Update them in your profile.",
+      "pending": "Appears once your body stats are added.",
+      "maintenance": "Maintenance calories",
+      "maintenanceHint": "Keeps your current weight",
+      "calorieTarget": "Calorie target",
+      "protein": "Protein target",
+      "proteinHint": "{plan} macro split",
+      "gramsPerDay": "g/day",
+      "healthyWeight": "Healthy weight {min}–{max} kg",
+      "masses": "{fat} kg fat · {lean} kg lean",
+      "needs": {
+        "maintenance": "Needs sex, height, weight, activity level and date of birth",
+        "protein": "Needs maintenance calories",
+        "bmi": "Needs height and weight",
+        "bodyFat": "Needs sex, neck and waist (+ hip for women)"
+      }
+    },
+    "nutrition": {
+      "title": "Nutrition",
+      "description": "Daily calories for your goal and how to split them."
+    },
+    "body": {
+      "title": "Body",
+      "description": "Where you sit on standard reference ranges."
+    },
+    "setup": {
+      "title": "Set up your targets",
+      "description": "BiteWise uses your body stats to calculate BMI, body fat, daily calories and macros.",
+      "progress": "Progress",
+      "progressCount": "{done} of {total}",
+      "done": "Done",
+      "steps": {
+        "bodyStats": {
+          "title": "Add body stats",
+          "description": "Sex, height and weight",
+          "unlocks": "Unlocks BMI"
+        },
+        "activity": {
+          "title": "Set your activity level",
+          "description": "How active a typical week is, and your date of birth",
+          "unlocks": "Unlocks calories & macros"
+        },
+        "measurements": {
+          "title": "Add measurements",
+          "description": "Neck and waist, plus hip for women",
+          "unlocks": "Unlocks body fat"
+        }
+      }
+    },
+    "library": {
+      "title": "Your library",
+      "description": "Build meals from ingredients, then combine meals into plans.",
+      "buildTitle": "Build your library",
+      "buildDescription": "Each step builds on the one before.",
+      "step": "Step {n}",
+      "steps": {
+        "ingredients": {
+          "title": "Add ingredients",
+          "description": "Nutrition per 100 g or per piece.",
+          "action": "Add ingredient"
+        },
+        "meals": {
+          "title": "Combine them into meals",
+          "description": "Totals are calculated for you.",
+          "action": "Add meal",
+          "needs": "Needs 1 ingredient"
+        },
+        "mealPlans": {
+          "title": "Plan your days",
+          "description": "Compare each plan to your targets.",
+          "action": "Add meal plan",
+          "needs": "Needs 1 meal"
+        }
+      }
+    }
+  },
+  "common": {
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "disabled": "Disabled",
+    "generated": "Generated",
+    "lastSeen": "Last Seen",
+    "ago": "ago",
+    "minutes": "minutes",
+    "hours": "hours",
+    "continue": "Continue",
+    "upload": "Upload",
+    "loading": "Loading",
+    "profileImage": "Profile Image",
+    "crop": "Crop",
+    "savedSuccessfully": "Saved successfully",
+    "notSet": "Not set"
+  },
+  "validation": {
+    "emailInvalid": "Invalid email",
+    "imageRequired": "Please update or add new image.",
+    "imageType": ".jpg, .jpeg, .png and .webp files are accepted.",
+    "imageSize": "Max file size is 5MB.",
+    "imageRejected": "The image couldn't be uploaded. Use a .jpg, .png or .webp file up to 5MB.",
+    "required": "This field is required",
+    "invalidUrl": "Invalid URL",
+    "heightRange": "Height must be between {min} and {max} cm",
+    "weightRange": "Weight must be between {min} and {max} kg",
+    "wholeNumber": "Use a whole number",
+    "oneDecimal": "Use at most one decimal",
+    "ageRange": "You must be between {min} and {max} years old",
+    "neckRange": "Neck must be between {min} and {max} cm",
+    "waistRange": "Waist must be between {min} and {max} cm",
+    "hipRange": "Hip must be between {min} and {max} cm",
+    "halfStep": "Use steps of 0.5",
+    "waistAboveNeck": "Waist must be greater than neck"
+  },
+  "profile": {
+    "basic": {
+      "cropImage": "Crop Image",
+      "cropImageDesc": "Adjust and crop your profile image",
+      "title": "Profile",
+      "description": "Your photo and sign-in email.",
+      "email": "Email",
+      "changePhoto": "Change photo"
+    },
+    "menuOptions": {
+      "profile": "Profile",
+      "security": "Security",
+      "preferences": "Preferences"
+    },
+    "deleteAccount": {
+      "title": "Delete account",
+      "description": "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+      "verification": "Are you absolutely sure?",
+      "rowDescription": "Permanently remove your account and all its data."
+    },
+    "personalInformation": {
+      "title": "Personal information",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phoneNumber": "Phone number",
+      "username": "Username",
+      "dob": "Date of birth",
+      "description": "Optional details about you.",
+      "edit": "Edit personal info"
+    },
+    "bodyStats": {
+      "title": "Body stats",
+      "description": "Used for BMI, body fat, calories and macros on your dashboard.",
+      "sex": "Sex (for calculations)",
+      "height": "Height",
+      "weight": "Weight",
+      "neck": "Neck",
+      "waist": "Waist",
+      "hip": "Hip",
+      "hipHint": "Only used for women.",
+      "activityLevel": "Activity level",
+      "notSet": "Not set",
+      "select": "Select",
+      "sexes": {
+        "MALE": "Male",
+        "FEMALE": "Female"
+      },
+      "activityLevels": {
+        "SEDENTARY": "Sedentary: little or no exercise",
+        "LIGHT": "Light: exercise 1–3 times/week",
+        "MODERATE": "Moderate: exercise 4–5 times/week",
+        "ACTIVE": "Active: daily exercise, or intense exercise 3–4 times/week",
+        "VERY_ACTIVE": "Very active: intense exercise 6–7 times/week",
+        "EXTRA_ACTIVE": "Extra active: very intense exercise daily, or a physical job"
+      },
+      "viewDashboard": "View dashboard",
+      "edit": "Edit body stats",
+      "basics": "Basics",
+      "measurements": "Measurements",
+      "womenOnly": "Women only"
+    },
+    "socialProfiles": {
+      "title": "Social profiles",
+      "description": "Links to your profiles elsewhere.",
+      "edit": "Edit social profiles"
+    },
+    "security": {
+      "oldPassword": "Old Password",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "changePassword": "Change Password",
+      "passwordChanged": "Password changed successfully",
+      "toggleVisibility": "Toggle password visibility",
+      "emailTitle": "Email",
+      "emailDescription": "The address you sign in with.",
+      "passwordTitle": "Password",
+      "passwordDescription": "Change the password you sign in with."
+    },
+    "appearance": {
+      "language": "Language",
+      "languageDesc": "The language of BiteWise.",
+      "english": "English",
+      "hungarian": "Hungarian",
+      "theme": "Theme",
+      "themeDesc": "Light, dark, or as your device is set.",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "page": {
+      "title": "Account settings",
+      "description": "Manage your profile and the stats behind your targets.",
+      "back": "Back to dashboard",
+      "tabs": "Settings"
+    }
+  },
+  "resourceTable": {
+    "add": "Add",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "duplicate": "Duplicate",
+    "copyOf": "Copy of {name}",
+    "close": "Close",
+    "cancel": "Cancel",
+    "continue": "Continue",
+    "actions": "Actions",
+    "previous": "Previous",
+    "next": "Next",
+    "previousPage": "Go to previous page",
+    "nextPage": "Go to next page",
+    "pagination": "Pagination",
+    "search": "Search...",
+    "clearSearch": "Clear search",
+    "notFound": "Not found.",
+    "remove": "Remove {name}",
+    "deleteConfirm": "Are you sure you want to delete {name}?",
+    "created": "Added successfully!",
+    "updated": "Updated successfully!",
+    "deleted": "Deleted successfully.",
+    "positiveNumber": "{field} must be a positive number",
+    "nameTaken": "This name is already in use",
+    "showing": "Showing {from}–{to} of {total}",
+    "rowActions": "Actions for {name}",
+    "compare": "Compare"
+  },
+  "resources": {
+    "ingredients": {
+      "title": "Ingredients",
+      "empty": "No ingredients yet",
+      "noMatch": "No ingredients match \"{term}\"",
+      "searchPlaceholder": "Search ingredients",
+      "addTitle": "Add ingredient",
+      "editTitle": "Edit ingredient",
+      "deleteTitle": "Delete ingredient",
+      "columns": {
+        "name": "Ingredient",
+        "calories": "Calories",
+        "protein": "Protein",
+        "totalCarbohydrates": "Carbs",
+        "totalFat": "Fat",
+        "dietaryFiber": "Fiber"
+      },
+      "fields": {
+        "name": "Name",
+        "protein": "Protein",
+        "totalFat": "Total fat",
+        "saturatedFat": "Saturated fat",
+        "totalCarbohydrates": "Total carbohydrates",
+        "sugar": "Sugar",
+        "dietaryFiber": "Dietary fiber",
+        "calories": "Calories",
+        "unit": "Unit",
+        "unitPlaceholder": "Select unit..."
+      },
+      "validation": {
+        "nameRequired": "Name is required"
+      },
+      "description": "Nutrition values per 100 g or per piece.",
+      "compare": "Compare ingredients",
+      "units": {
+        "100g": "per 100 g",
+        "piece": "per piece"
+      },
+      "list": {
+        "sugar": "sugar {value} g",
+        "saturated": "saturated {value} g",
+        "sugarLabel": "Sugar",
+        "saturatedLabel": "Sat. fat",
+        "fiberLabel": "Fiber",
+        "macros": "P {protein} · C {carbs} · F {fat}",
+        "details": "Details for {name}"
+      }
+    },
+    "meals": {
+      "title": "Meals",
+      "empty": "No meals yet",
+      "noMatch": "No meals match \"{term}\"",
+      "searchPlaceholder": "Search meals",
+      "addTitle": "Add meal",
+      "editTitle": "Edit meal",
+      "deleteTitle": "Delete meal",
+      "columns": {
+        "name": "Name"
+      },
+      "fields": {
+        "name": "Meal name",
+        "ingredient": "Ingredient",
+        "ingredientPlaceholder": "Select ingredient...",
+        "quantity": "Quantity",
+        "addIngredient": "Add ingredient",
+        "removeIngredient": "Remove ingredient",
+        "grams": "g",
+        "pieces": "pcs"
+      },
+      "validation": {
+        "nameRequired": "Meal name is required",
+        "ingredientsRequired": "At least one ingredient is required",
+        "ingredientRequired": "Select an ingredient",
+        "quantityPositive": "Quantity must be greater than 0",
+        "ingredientDuplicate": "Each ingredient can be added only once"
+      },
+      "description": "Totals are calculated from each meal’s ingredients.",
+      "compare": "Compare meals",
+      "card": {
+        "ingredients": {
+          "one": "{count} ingredient",
+          "other": "{count} ingredients"
+        },
+        "fiber": "{value} g fiber",
+        "show": {
+          "one": "Show {count} ingredient",
+          "other": "Show {count} ingredients"
+        },
+        "hide": "Hide ingredients",
+        "grams": "{value} g",
+        "pieces": {
+          "one": "{count} piece",
+          "other": "{count} pieces"
+        },
+        "sugar": "sugar {value} g",
+        "saturated": "saturated {value} g"
+      }
+    },
+    "mealPlans": {
+      "title": "Meal plans",
+      "empty": "No meal plans yet",
+      "noMatch": "No meal plans match \"{term}\"",
+      "searchPlaceholder": "Search meal plans",
+      "addTitle": "Add meal plan",
+      "editTitle": "Edit meal plan",
+      "deleteTitle": "Delete meal plan",
+      "columns": {
+        "name": "Name"
+      },
+      "fields": {
+        "name": "Meal plan name",
+        "meals": "Meals",
+        "mealsPlaceholder": "Select meals..."
+      },
+      "validation": {
+        "nameRequired": "Name is required",
+        "mealsRequired": "At least one meal is required"
+      },
+      "description": "Each plan is one day, compared with your daily targets.",
+      "compare": "Compare plans",
+      "card": {
+        "meals": {
+          "one": "{count} meal",
+          "other": "{count} meals"
+        },
+        "openAsDraft": "Open as draft",
+        "calories": "Calories",
+        "ofKcal": "/ {value} kcal",
+        "ofGrams": "/ {value} g",
+        "onTarget": "On target ({diff} kcal)",
+        "under": "{value} kcal under maintenance",
+        "over": "{value} kcal over maintenance",
+        "underTarget": "{value} kcal under target ({target})",
+        "overTarget": "{value} kcal over target ({target})",
+        "show": {
+          "one": "Show {count} meal",
+          "other": "Show {count} meals"
+        },
+        "hide": "Hide meals",
+        "noTargets": "Add your body stats to compare plans with your daily targets.",
+        "addToWeekPlan": "Add to week plan"
+      },
+      "targets": "Targets: {kcal} kcal ({target}) · {plan} split"
+    }
+  },
+  "auth": {
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "accountDeleted": "Your account has been deleted.",
+    "passwordFirst": "An account with this email already exists. Sign in with your password first.",
+    "oauthFailed": "Google sign-in didn't complete. Please try again."
+  },
+  "emailVerification": {
+    "signUpSent": "Account created. We sent a verification email to {email}.",
+    "verifying": "Verifying your email…",
+    "verifiedTitle": "Email verified",
+    "verified": "Thanks, your email address is verified.",
+    "invalidTitle": "This link doesn't work",
+    "invalid": "The verification link is invalid or has expired. Sign in to request a new one.",
+    "failedTitle": "Something went wrong",
+    "failed": "We couldn't verify your email right now. Please try again later.",
+    "continue": "Continue to BiteWise",
+    "requestNew": "Sign in to get a new link",
+    "bannerTitle": "Verify your email address",
+    "banner": "We sent a link to {email}. Open it to finish setting up your account.",
+    "resend": "Resend email",
+    "resendIn": "Resend in {seconds}s",
+    "resent": "Verification email sent to {email}.",
+    "resendThrottled": "You've requested too many emails. Please wait a few minutes and try again.",
+    "avatarLocked": "Verify your email address to upload a profile image."
+  },
+  "passwordReset": {
+    "forgotLink": "Forgot password?",
+    "forgotTitle": "Forgot your password?",
+    "forgotIntro": "Enter your email and we'll send you a link to reset it.",
+    "email": "Email Address",
+    "sendLink": "Send reset link",
+    "sent": "If an account exists for this address, we sent a reset link.",
+    "throttled": "Too many requests, try again later.",
+    "failed": "Something went wrong. Please try again later.",
+    "backToSignIn": "Back to sign in",
+    "resetTitle": "Set a new password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "updatePassword": "Update password",
+    "updated": "Password updated, sign in.",
+    "invalidTitle": "Link invalid or expired",
+    "invalid": "This reset link is invalid or has expired.",
+    "requestNew": "Request a new link"
+  },
+  "passwordPolicy": {
+    "passwordMinLength": "Password must be at least 8 characters long",
+    "passwordUppercase": "Password must contain at least one uppercase letter",
+    "passwordLowercase": "Password must contain at least one lowercase letter",
+    "passwordNumberRequired": "Password must contain at least one number",
+    "passwordRequired": "Password is required",
+    "passwordMatch": "Passwords must match",
+    "oldPasswordRequired": "Old password is required",
+    "confirmPasswordRequired": "Confirm password is required"
+  },
+  "draftMealPlan": {
+    "title": "Draft meal plan",
+    "description": "A scratchpad for a day outside your Meal plans.",
+    "startDescription": "Try out a day that isn't part of your Meal plans, like a cheat day.",
+    "start": "Start draft",
+    "empty": "Add meals or ingredients to see their nutrition.",
+    "addMeal": "Add meal",
+    "addIngredient": "Add ingredient",
+    "clear": "Clear draft",
+    "clearConfirm": "This removes every meal and ingredient from the draft. It can't be undone.",
+    "collapse": "Collapse draft meal plan",
+    "expand": "Expand draft meal plan",
+    "removed": "Removed {count} item(s) from the draft that no longer exist.",
+    "recordsError": "Couldn't load the meals and ingredients.",
+    "total": "Total",
+    "columns": {
+      "item": "Meal or ingredient",
+      "quantity": "Quantity",
+      "calories": "Calories",
+      "protein": "Protein",
+      "totalFat": "Fat",
+      "totalCarbohydrates": "Carbs",
+      "dietaryFiber": "Fiber",
+      "sugar": "sugar {value} g",
+      "saturatedFat": "saturated {value} g"
+    },
+    "fields": {
+      "meal": "Meal",
+      "ingredient": "Ingredient",
+      "mealPlaceholder": "Select meal...",
+      "ingredientPlaceholder": "Select ingredient...",
+      "multiplier": "Servings",
+      "amount": "Amount",
+      "servings": "×",
+      "grams": "g",
+      "pieces": "pcs"
+    },
+    "maintenance": {
+      "kcal": "kcal",
+      "comparedWith": "compared with your Maintenance calories ({maintenance} kcal/day)",
+      "comparedWithTarget": "compared with your Calorie target, {target} ({kcal} kcal/day)",
+      "missing": "Add your Body stats and date of birth to compare the draft with your Maintenance calories.",
+      "completeProfile": "Complete Profile"
+    },
+    "validation": {
+      "itemRequired": "Select a meal or ingredient",
+      "quantityPositive": "Quantity must be greater than 0",
+      "multiplierStep": "Use steps of 0.5",
+      "mealPlanRequired": "Select a meal plan"
+    },
+    "load": {
+      "button": "Load meal plan",
+      "title": "Load a meal plan",
+      "description": "Copy a Meal plan's meals into the draft, one serving each. The Meal plan itself isn't changed.",
+      "mealPlan": "Meal plan",
+      "placeholder": "Select meal plan...",
+      "replaceWarning": "This replaces the {count} line(s) in your draft.",
+      "loading": "Loading meal plans...",
+      "error": "Couldn't load your meal plans.",
+      "retry": "Try again",
+      "empty": "No meal plans yet.",
+      "goToMealPlans": "Go to Meal plans",
+      "submit": "Load",
+      "loaded": "Loaded {name}"
+    },
+    "header": {
+      "startDay": "Start draft day",
+      "cardTitle": "Draft a day",
+      "loadShort": "Load plan"
+    }
+  },
+  "errorBoundary": {
+    "title": "Something went wrong!",
+    "description": "An unexpected error occurred. Please try again.",
+    "errorCode": "Error code",
+    "tryAgain": "Try again"
+  },
+  "comparison": {
+    "page": {
+      "title": "Compare",
+      "description": "Put up to three items side by side. The first one is the baseline."
+    },
+    "kindLabel": "What to compare",
+    "kinds": {
+      "ingredients": "Ingredients",
+      "meals": "Meals",
+      "plans": "Meal plans"
+    },
+    "chooseTitle": {
+      "ingredients": "Choose ingredients",
+      "meals": "Choose meals",
+      "plans": "Choose meal plans"
+    },
+    "baseline": "Baseline",
+    "item": "Item {n}",
+    "none": "None",
+    "placeholder": "Select…",
+    "pickPrompt": "Pick a baseline to start comparing.",
+    "loadError": "Couldn't load what you picked.",
+    "retry": "Try again",
+    "overview": {
+      "title": "Overview",
+      "description": {
+        "ingredients": "Each ingredient as recorded: per 100 g or per piece.",
+        "meals": "One serving of each meal.",
+        "plans": "One day of each meal plan."
+      }
+    },
+    "basis": {
+      "100g": "per 100 g",
+      "piece": "per piece",
+      "meals": {
+        "one": "1 serving · {count} ingredient",
+        "other": "1 serving · {count} ingredients"
+      },
+      "plans": {
+        "one": "1 day · {count} meal",
+        "other": "1 day · {count} meals"
+      }
+    },
+    "ofTarget": "{percent} of your {kcal} kcal target",
+    "nutrients": {
+      "title": "Nutrient by nutrient",
+      "description": "Bars are scaled to the largest value in each row. Differences are vs. {name}.",
+      "nutrient": "Nutrient",
+      "showDifferences": "Show differences",
+      "same": "same",
+      "rows": {
+        "calories": "Calories",
+        "protein": "Protein",
+        "totalCarbohydrates": "Carbs",
+        "sugar": "of which sugar",
+        "totalFat": "Fat",
+        "saturatedFat": "of which saturated",
+        "dietaryFiber": "Fiber"
+      }
+    },
+    "empty": {
+      "ingredients": "Add at least two ingredients to compare them.",
+      "meals": "Add at least two meals to compare them.",
+      "plans": "Add at least two meal plans to compare them.",
+      "action": {
+        "ingredients": "Go to ingredients",
+        "meals": "Go to meals",
+        "plans": "Go to meal plans"
+      }
+    }
+  },
+  "emailChange": {
+    "current": "Current email: {email}",
+    "newEmail": "New email address",
+    "currentPassword": "Current password",
+    "submit": "Change email",
+    "requested": "We sent confirmation links to {email} and your current address.",
+    "pending": "Pending: {email}, expires {expires}",
+    "resend": "Resend",
+    "cancel": "Cancel change",
+    "cancelled": "Email change cancelled.",
+    "managedByGoogle": "Managed by Google",
+    "confirming": "Confirming your new email…",
+    "confirmedTitle": "Email changed",
+    "confirmedSignedOut": "Email changed, sign in with your new address.",
+    "confirmed": "Your email address was changed. Your other devices were signed out.",
+    "returnToSettings": "Return to settings",
+    "signIn": "Sign in",
+    "invalidTitle": "This link doesn't work",
+    "invalid": "This link is invalid or has expired.",
+    "takenTitle": "Address taken",
+    "taken": "Someone else registered this address in the meantime. Your email was not changed.",
+    "failedTitle": "Something went wrong",
+    "failed": "Something went wrong. Please try again later.",
+    "cancelTitle": "Cancel the email change?",
+    "cancelIntro": "Someone asked to change the email of your BiteWise account. Cancelling signs out all devices and clears your password.",
+    "cancelAction": "Cancel the change",
+    "cancelledTitle": "Change cancelled",
+    "setPassword": "Set a new password",
+    "cancelledDone": "The change was cancelled, all devices were signed out and your password was cleared. Set a new one to sign in."
+  },
+  "weekPlan": {
+    "title": "Week plan",
+    "description": "A scratchpad for a whole week, Monday to Sunday. Saved on this device only.",
+    "removed": "Removed {count} item(s) from the week that no longer exist.",
+    "summary": {
+      "title": "This week",
+      "average": "Daily average",
+      "averageOf": {
+        "one": "Average of {count} planned day",
+        "other": "Average of {count} planned days"
+      },
+      "noPlannedDays": "No planned days yet",
+      "ofKcal": "/ {value} kcal",
+      "onTarget": "Days on target",
+      "within": "within ±{value} kcal",
+      "emptyOffTarget": "Empty days count as off target."
+    },
+    "days": {
+      "label": "Days of the week",
+      "today": "Today",
+      "empty": "Empty",
+      "onTarget": "On target",
+      "offTarget": "{value} kcal from target"
+    },
+    "day": {
+      "copy": "Copy to other days…",
+      "copyShort": "Copy to…",
+      "clear": "Clear day"
+    },
+    "load": {
+      "description": "Copy a Meal plan's meals onto the days you pick, one serving each. The Meal plan itself isn't changed.",
+      "days": "Days",
+      "submit": {
+        "one": "Load onto {count} day",
+        "other": "Load onto {count} days"
+      }
+    },
+    "copy": {
+      "title": "Copy {day} to…",
+      "description": "The days you pick get a copy of {day}'s meals and ingredients.",
+      "days": "Copy to",
+      "submit": {
+        "one": "Copy to {count} day",
+        "other": "Copy to {count} days"
+      },
+      "copied": "Copied {day}"
+    },
+    "replaces": {
+      "one": "Replaces {count} planned day: {days}.",
+      "other": "Replaces {count} planned days: {days}."
+    },
+    "clearWeek": {
+      "button": "Clear week",
+      "title": "Clear the whole week?",
+      "confirm": "This removes every meal and ingredient from all seven days. It can't be undone."
+    }
+  }
+}
