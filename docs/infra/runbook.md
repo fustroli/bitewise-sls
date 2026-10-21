@@ -111,7 +111,7 @@ Plan, decisions and port order: `docs/frontend-handover.md`.
 
 - [ ] New static-export Next.js app in `web/`, port pages/components from `bitewise-frontend`;
       `trailingSlash: true` (the SPA rewrite Function expects `/x/index.html` files)
-- [ ] Fetch client + TanStack Query, Amplify Auth, client-side guard on dashboard
+- [x] Fetch client + TanStack Query, Amplify Auth, client-side guard on dashboard
 - [ ] Build-time env: API URL, pool/client ids, Cognito domain, avatar URL
 - [ ] Deploy: `next build` → upload `out/` to the web bucket → CloudFront invalidation `/*`
 - [ ] Response headers policy: CSP (`'self'` + hashes, `connect-src` API + Cognito), HSTS,
@@ -148,6 +148,9 @@ Plan, decisions and port order: `docs/frontend-handover.md`.
 - Managed login is email-first: "Forgot your password?" only shows after Next, on the password step.
 - Google → native linking in pre-sign-up worked on the first sign-in; the reported "Already found an
   entry for username" first-attempt error did not occur.
+- HTTP API CORS doesn't help the SPA: preflight `OPTIONS` matches the `ANY` routes and gets the JWT
+  authorizer's 401 (an `OPTIONS /{proxy+}` route loses to the exact-path `ANY` routes). `next dev`
+  proxies `/api/*` to the app domain instead (dev-only rewrite), so the API needs no CORS.
 - Web app Google sign-in: `redirect_mismatch`, then one failed sign-in right after fixing the app
   client's callback URLs; the next try worked (settings take a moment). The app logs the cause as
   `Google sign-in failed` in the browser console.

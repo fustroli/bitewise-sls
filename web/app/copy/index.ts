@@ -6,4 +6,7 @@ import en from './en.json';
  */
 export const copy = en;
 
+/** For number and date formatting. */
+export const LOCALE = 'en';
+
 export type TDictionary = typeof copy;

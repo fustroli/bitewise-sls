@@ -123,10 +123,10 @@ Amplify config (`Amplify.configure`, once, client-side):
 
 ## Data layer
 
-- `app/lib/api.ts`: `api<T>(path, { method, body, query })` → `TApiResult<T>`. Base URL `/api` on the
-  deployed site (same origin, no CORS). Static export can't proxy in `next dev`, so locally use
-  `NEXT_PUBLIC_API_URL=https://sls.bitewise.rolandfuest.com/api` and add CORS for
-  `http://localhost:3000` on the HTTP API (a console step to add to the runbook).
+- `app/lib/api.ts`: `api<T>(path, { method, body, query })` → `TApiResult<T>`. Base URL `/api`, same
+  origin everywhere: CloudFront routes it when deployed, and `next dev` proxies it to the app domain
+  (a dev-only rewrite in `next.config.mjs`). No CORS on the API: the `ANY` routes would send the
+  preflight to the JWT authorizer.
 - Query keys: `['ingredients', 'list', query]`, `['ingredients', 'options']`, `['ingredients', 'byIds', ids]`,
   same for meals / meal plans, `['me']`, `['statistics']`.
 - Library counts: use `GET /api/users/me/statistics` (one call) instead of three `?limit=1` lists.
@@ -166,8 +166,8 @@ Start from the old `csp.ts` and remove the nonce:
 
 ## Build and deploy
 
-- Env (build-time, `NEXT_PUBLIC_*`): API base URL, user pool id, client id, Cognito domain, avatar
-  base URL (section 6).
+- Env (build-time, `NEXT_PUBLIC_*`): user pool id, client id, Cognito domain, avatar base URL
+  (section 6). The API is always `/api`.
 - `bun run build` in `web/` → `web/out/`; upload to the web bucket (replace the placeholder), then a
   CloudFront invalidation `/*`. CI (section 7) automates this later.
 - Each page must exist as `out/<route>/index.html` for the SPA rewrite Function.
@@ -200,10 +200,9 @@ domain after an upload).
 
 - Pending email change: confirm what `GetUser` returns while a change is pending (the API returns
   `pendingEmail: null` for now).
-- Local development against the deployed API needs CORS on the HTTP API for `http://localhost:3000`.
 
 ## Runbook and cleanup
 
 - Runbook section 5 boxes stay the checklist; tick them as the steps land.
 - New AWS resources this section creates: the response headers policy (already on the cleanup list
-  under section 2), CORS config on the HTTP API (goes with the API).
+  under section 2).
