@@ -12,7 +12,7 @@ const firstError = (password: string) => {
 };
 
 describe('password policy', () => {
-  it.each(['Password1', 'abcDEF12', 'Zz345678', 'Long Passphrase 2024'])(
+  it.each(['Password1!', 'abcDEF1_', 'Zz34567=', 'Long Passphrase 2024'])(
     'accepts %j',
     (password) => {
       expect(firstError(password)).toBeUndefined();
@@ -24,7 +24,10 @@ describe('password policy', () => {
     ['Pass1', messages.passwordMinLength],
     ['password1', messages.passwordUppercase],
     ['PASSWORD1', messages.passwordLowercase],
-    ['Password', messages.passwordNumberRequired],
+    ['Password!', messages.passwordNumberRequired],
+    ['Password1', messages.passwordSymbol],
+    // Cognito counts only ASCII symbols.
+    ['Passwörd1', messages.passwordSymbol],
   ])('rejects %j with %j', (password, message) => {
     expect(firstError(password)).toBe(message);
   });

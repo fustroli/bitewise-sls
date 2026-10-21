@@ -12,10 +12,10 @@ const DASHBOARD_MODULES = 'app/\\(modules\\)/dashboard/\\(modules\\)';
 const DASHBOARD_MODULES_GLOB = 'app/(modules)/dashboard/(modules)';
 
 const SHARED = [
-  'assets',
+  'auth',
   'components',
-  'hooks',
   'copy',
+  'hooks',
   'lib',
   'providers',
   'utils',

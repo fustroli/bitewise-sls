@@ -3,7 +3,13 @@ import FieldFrame, {
   IFieldProps,
 } from '@/app/components/form/FieldFrame';
 import { FieldValues, PathValue } from 'react-hook-form';
-import { FocusEvent, HTMLInputTypeAttribute, ReactNode, Ref } from 'react';
+import {
+  FocusEvent,
+  HTMLAttributes,
+  HTMLInputTypeAttribute,
+  ReactNode,
+  Ref,
+} from 'react';
 
 import { Input } from '@/app/components/ui/input';
 import { cn } from '@/app/lib/utils';
@@ -12,6 +18,8 @@ interface IProps<T extends FieldValues> extends IFieldProps<T> {
   label?: string;
   hideLabel?: boolean;
   type?: HTMLInputTypeAttribute;
+  autoComplete?: string;
+  inputMode?: HTMLAttributes<HTMLInputElement>['inputMode'];
   /** For a number field; the schema still does the validating. */
   min?: number;
   max?: number;
@@ -29,6 +37,8 @@ const InputField = <T extends FieldValues>({
   label,
   hideLabel,
   type = 'text',
+  autoComplete,
+  inputMode,
   min,
   max,
   step,
@@ -48,6 +58,8 @@ const InputField = <T extends FieldValues>({
       <FieldControl>
         <Input
           type={type}
+          autoComplete={autoComplete}
+          inputMode={inputMode}
           name={field.name}
           value={field.value ?? ''}
           min={min}

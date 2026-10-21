@@ -8,6 +8,7 @@ export interface IPasswordPolicyMessages {
   passwordUppercase: string;
   passwordLowercase: string;
   passwordNumberRequired: string;
+  passwordSymbol: string;
   passwordRequired: string;
   passwordMatch: string;
   confirmPasswordRequired: string;
@@ -19,7 +20,11 @@ export const PASSWORD_RULE_KEYS = [
   'passwordUppercase',
   'passwordLowercase',
   'passwordNumberRequired',
+  'passwordSymbol',
 ] as const satisfies readonly (keyof IPasswordPolicyMessages)[];
+
+// The special characters Cognito's password policy counts as symbols.
+const SYMBOL = /[\^$*.[\]{}()?"!@#%&/\\,><':;|_~`=+\- ]/;
 
 export const createPasswordSchema = (messages: IPasswordPolicyMessages) =>
   z
@@ -28,7 +33,8 @@ export const createPasswordSchema = (messages: IPasswordPolicyMessages) =>
     .min(PASSWORD_MIN_LENGTH, messages.passwordMinLength)
     .regex(/[A-Z]/, messages.passwordUppercase)
     .regex(/[a-z]/, messages.passwordLowercase)
-    .regex(/\d/, messages.passwordNumberRequired);
+    .regex(/\d/, messages.passwordNumberRequired)
+    .regex(SYMBOL, messages.passwordSymbol);
 
 export const createConfirmPasswordSchema = (
   messages: IPasswordPolicyMessages,

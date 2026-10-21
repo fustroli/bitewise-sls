@@ -148,6 +148,9 @@ Plan, decisions and port order: `docs/frontend-handover.md`.
 - Managed login is email-first: "Forgot your password?" only shows after Next, on the password step.
 - Google → native linking in pre-sign-up worked on the first sign-in; the reported "Already found an
   entry for username" first-attempt error did not occur.
+- Web app Google sign-in: `redirect_mismatch`, then one failed sign-in right after fixing the app
+  client's callback URLs; the next try worked (settings take a moment). The app logs the cause as
+  `Google sign-in failed` in the browser console.
 - Cognito quick setup: sign-in identifiers and required attributes can't be changed after
   creation; a wrong choice means recreating the pool.
 - Cognito SES settings: the FROM field is a dropdown of verified SES identities (pick the domain);
