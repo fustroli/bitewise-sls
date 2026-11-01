@@ -5,10 +5,9 @@ import {
 import { api, unwrap } from '@/app/lib/api';
 
 import { TApiResult } from '@/app/utils/interfaces';
+import { parseInput } from '@/app/utils/helpers';
 import { profilePatchSchema } from '@bitewise/shared';
 import { queryOptions } from '@tanstack/react-query';
-
-const HTTP_BAD_REQUEST = 400;
 
 export const ME_KEY = ['me'] as const;
 
@@ -21,14 +20,8 @@ export const meQuery = queryOptions({
 export async function updateUser(
   change: IUserChange,
 ): Promise<TApiResult<IUser>> {
-  const input = profilePatchSchema.safeParse(change);
-  if (!input.success) {
-    return {
-      ok: false,
-      status: HTTP_BAD_REQUEST,
-      message: input.error.issues.map((issue) => issue.message).join(', '),
-    };
-  }
+  const input = parseInput(profilePatchSchema, change);
+  if (!input.ok) return input;
 
   return api<IUser>('users/me', { method: 'PATCH', body: input.data });
 }

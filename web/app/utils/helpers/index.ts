@@ -1,7 +1,8 @@
-// Safe to import from server, client and proxy code. Client-only helpers live
-// in `./client`, server-only helpers in `./server`.
+// Safe to import anywhere. Browser-only helpers (toasts, images) live in
+// `./client`.
 export * from './option.helpers';
 export * from './querybuilder.helper';
 export * from './util.helpers';
 export * from './chart.helpers';
 export * from './number.helpers';
+export * from './input.helpers';

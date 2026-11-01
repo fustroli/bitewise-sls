@@ -48,9 +48,9 @@ const MultiSelectField = <T extends FieldValues>({
   return (
     <FieldFrame control={control} name={name} label={label}>
       {(field) => {
-        const selected: number[] = field.value ?? [];
+        const selected: string[] = field.value ?? [];
 
-        const toggle = (value: number) =>
+        const toggle = (value: string) =>
           field.onChange(
             selected.includes(value)
               ? selected.filter((item) => item !== value)

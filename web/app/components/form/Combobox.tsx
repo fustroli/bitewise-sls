@@ -24,8 +24,8 @@ interface IProps extends Omit<
   ComponentPropsWithRef<typeof Button>,
   'value' | 'onChange'
 > {
-  value: number | null | undefined;
-  onChange: (value: number | null) => void;
+  value: string | null | undefined;
+  onChange: (value: string | null) => void;
   options: IOption[];
   placeholder: string;
   searchPlaceholder: string;
@@ -55,7 +55,7 @@ const Combobox = ({
     options.find((option) => option.value === value)?.label ??
     (value === null ? noneLabel : undefined);
 
-  const pick = (next: number | null) => {
+  const pick = (next: string | null) => {
     onChange(next);
     setOpen(false);
   };

@@ -1,4 +1,5 @@
 export interface IOption {
-  value: number;
+  /** A record's id. */
+  value: string;
   label: string;
 }

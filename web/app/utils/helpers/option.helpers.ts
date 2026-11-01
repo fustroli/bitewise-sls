@@ -1,7 +1,7 @@
 import { IOption } from '@/app/utils/interfaces';
 
 export const convertToOptions = (
-  records: { id: number; name: string }[],
+  records: { id: string; name: string }[],
 ): IOption[] => {
   return records.map((record) => ({
     value: record.id,
