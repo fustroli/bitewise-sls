@@ -14,15 +14,15 @@ export interface IRecordCache<T> {
   /** The records fetched so far. */
   records: T[];
   /** Ids the fetch didn't return: deleted, or never the User's. */
-  missing: number[];
+  missing: string[];
   /** Ids whose fetch failed; `retry()` asks for them again. */
-  failed: number[];
-  /** Fetches the ids not fetched yet (or failed), in batches; 0 is skipped. */
-  request: (ids: number[]) => void;
+  failed: string[];
+  /** Fetches the ids not fetched yet (or failed), in batches; '' is skipped. */
+  request: (ids: string[]) => void;
   retry: () => void;
 }
 
-const batches = (ids: number[]) =>
+const batches = (ids: string[]) =>
   Array.from({ length: Math.ceil(ids.length / MAX_IDS_PER_FETCH) }, (_, i) =>
     ids.slice(i * MAX_IDS_PER_FETCH, (i + 1) * MAX_IDS_PER_FETCH),
   );
@@ -32,13 +32,13 @@ const batches = (ids: number[]) =>
  * fetched once, however often it is requested: pending ones are not asked
  * for again, failed ones are. Pass a stable `fetchByIds` and `onFailure`.
  */
-export const useRecordCache = <T extends { id: number }>(
-  fetchByIds: (ids: number[]) => Promise<TApiResult<T[]>>,
+export const useRecordCache = <T extends { id: string }>(
+  fetchByIds: (ids: string[]) => Promise<TApiResult<T[]>>,
   onFailure?: (result: TApiResult<T[]>) => void,
-  /** Records already at hand, e.g. fetched on the server; read once. */
+  /** Records already at hand; read once. */
   initial?: T[],
 ): IRecordCache<T> => {
-  const [entries, setEntries] = useState<ReadonlyMap<number, TEntry<T>>>(
+  const [entries, setEntries] = useState<ReadonlyMap<string, TEntry<T>>>(
     () =>
       new Map(
         initial?.map((record) => [record.id, { status: 'ready', record }]),
@@ -47,19 +47,19 @@ export const useRecordCache = <T extends { id: number }>(
   // Each id's status as of the last request, ahead of the next render, so
   // two requests before it don't both fetch an id.
   const statuses = useRef(
-    new Map<number, TStatus>(initial?.map(({ id }) => [id, 'ready'])),
+    new Map<string, TStatus>(initial?.map(({ id }) => [id, 'ready'])),
   );
 
-  const update = useCallback((changes: [number, TEntry<T>][]) => {
+  const update = useCallback((changes: [string, TEntry<T>][]) => {
     for (const [id, entry] of changes) statuses.current.set(id, entry.status);
     setEntries((current) => new Map([...current, ...changes]));
   }, []);
 
   const request = useCallback(
-    (ids: number[]) => {
+    (ids: string[]) => {
       const wanted = [...new Set(ids)].filter((id) => {
         const status = statuses.current.get(id);
-        return id > 0 && (status === undefined || status === 'failed');
+        return id !== '' && (status === undefined || status === 'failed');
       });
       if (!wanted.length) return;
 
@@ -101,8 +101,8 @@ export const useRecordCache = <T extends { id: number }>(
 
   return useMemo(() => {
     const records: T[] = [];
-    const missing: number[] = [];
-    const failed: number[] = [];
+    const missing: string[] = [];
+    const failed: string[] = [];
     for (const [id, entry] of entries) {
       if (entry.status === 'ready') records.push(entry.record);
       else if (entry.status === 'missing') missing.push(id);

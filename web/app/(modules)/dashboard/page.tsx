@@ -1,5 +1,9 @@
 'use client';
 
+import DraftActions from '@/app/(modules)/dashboard/(modules)/_draft-meal-plan/components/DraftActions';
+import { DraftMealPlanProvider } from '@/app/(modules)/dashboard/(modules)/_draft-meal-plan/provider';
+import DraftMealPlanSection from '@/app/(modules)/dashboard/components/DraftMealPlanSection';
+import DraftMealPlanSkeleton from '@/app/(modules)/dashboard/(modules)/_draft-meal-plan/components/DraftMealPlanSkeleton';
 import Library from '@/app/(modules)/dashboard/components/Library/Library';
 import LibrarySection from '@/app/(modules)/dashboard/components/Library';
 import Overview from '@/app/(modules)/dashboard/components/Overview';
@@ -9,24 +13,34 @@ import UserMenuLink from '@/app/(modules)/dashboard/components/UserMenuLink';
 import { useDictionary } from '@/app/providers/dictionary-provider';
 
 /**
- * The Overview reads the User from context, so it renders at once; the
- * library counts load behind a skeleton of their own layout. Suspense
- * catches no errors: a failed load still reaches `error.tsx`.
+ * The fetched sections load behind skeletons of their own layout; the
+ * Overview reads the User from context, so it renders at once. Suspense
+ * catches no errors: a failed load still reaches `error.tsx`. The outer
+ * boundary is for the draft provider's `?draft=`.
  */
 export default function Page() {
   const { dashboard } = useDictionary();
 
   return (
-    <>
-      <PageHeader
-        title={dashboard.sidebar.dashboard}
-        description={dashboard.description}
-        mobileActions={<UserMenuLink />}
-      />
-      <Overview />
-      <Suspense fallback={<Library />}>
-        <LibrarySection />
-      </Suspense>
-    </>
+    <Suspense fallback={<DraftMealPlanSkeleton />}>
+      <DraftMealPlanProvider mealPlansHref="/dashboard/meal-plans">
+        <PageHeader
+          title={dashboard.sidebar.dashboard}
+          description={dashboard.description}
+          actions={<DraftActions />}
+          mobileActions={<UserMenuLink />}
+        />
+        <Overview
+          afterSummary={
+            <Suspense fallback={<DraftMealPlanSkeleton />}>
+              <DraftMealPlanSection />
+            </Suspense>
+          }
+        />
+        <Suspense fallback={<Library />}>
+          <LibrarySection />
+        </Suspense>
+      </DraftMealPlanProvider>
+    </Suspense>
   );
 }
