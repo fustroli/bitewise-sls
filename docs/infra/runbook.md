@@ -109,13 +109,18 @@ Whenever a step creates something, add its delete step to `cleanup.md`.
 
 Plan, decisions and port order: `docs/frontend-handover.md`.
 
-- [ ] New static-export Next.js app in `web/`, port pages/components from `bitewise-frontend`;
+- [x] New static-export Next.js app in `web/`, port pages/components from `bitewise-frontend`;
       `trailingSlash: true` (the SPA rewrite Function expects `/x/index.html` files)
 - [x] Fetch client + TanStack Query, Amplify Auth, client-side guard on dashboard
-- [ ] Build-time env: API URL, pool/client ids, Cognito domain, avatar URL
-- [ ] Deploy: `next build` → upload `out/` to the web bucket → CloudFront invalidation `/*`
-- [ ] Response headers policy: CSP (`'self'` + hashes, `connect-src` API + Cognito), HSTS,
-      nosniff, frame DENY, Referrer- and Permissions-Policy
+- [x] Build-time env (`web/.env.example`): pool/client ids, Cognito domain; the API is always `/api`.
+      Avatar URL comes with section 6
+- [x] Response headers: the Free flat-rate plan allows only **managed** policies. Attach
+      `SecurityHeadersPolicy` (HSTS, nosniff, X-Frame-Options SAMEORIGIN, Referrer-Policy) to the default
+      behavior and to `/api/*` (Distribution → Behaviors → Edit → Response headers policy). The CSP ships
+      as a `<meta>` tag that `bun run build` writes into every page (`web/scripts/csp.ts`)
+- [x] Deploy: `bun run build` in `web/` → upload the **contents** of `web/out/` to the web bucket root
+      (Upload → Add files + Add folder; it replaces the placeholder `index.html`) → Invalidation `/*`
+- [x] CDK: managed `SecurityHeadersPolicy` on both behaviors in the `Web` stack
 
 ## 6. Avatars
 
@@ -148,6 +153,11 @@ Plan, decisions and port order: `docs/frontend-handover.md`.
 - Managed login is email-first: "Forgot your password?" only shows after Next, on the password step.
 - Google → native linking in pre-sign-up worked on the first sign-in; the reported "Already found an
   entry for username" first-attempt error did not occur.
+- CloudFront's Free flat-rate plan offers only managed response headers policies ("Custom: available
+  with the Business plan"), so no custom CSP header. The CSP is a per-page `<meta>` tag instead: a
+  static export has no nonce, so `web/scripts/csp.ts` hashes each page's inline scripts (theme,
+  Turbopack bootstrap, RSC payload; they change with the code) at build time. A meta CSP can't carry
+  `frame-ancestors`; the managed policy's X-Frame-Options SAMEORIGIN covers framing.
 - HTTP API CORS doesn't help the SPA: preflight `OPTIONS` matches the `ANY` routes and gets the JWT
   authorizer's 401 (an `OPTIONS /{proxy+}` route loses to the exact-path `ANY` routes). `next dev`
   proxies `/api/*` to the app domain instead (dev-only rewrite), so the API needs no CORS.

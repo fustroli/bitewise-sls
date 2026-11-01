@@ -13,6 +13,7 @@ import {
   HttpVersion,
   OriginProtocolPolicy,
   OriginRequestPolicy,
+  ResponseHeadersPolicy,
   ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { HttpOrigin, S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
@@ -67,6 +68,9 @@ export class WebStack extends Stack {
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
         cachePolicy: CachePolicy.CACHING_OPTIMIZED,
+        // Managed only: the Free flat-rate plan allows no custom policy. The CSP is a <meta> tag
+        // the web build writes into every page.
+        responseHeadersPolicy: ResponseHeadersPolicy.SECURITY_HEADERS,
         compress: true,
         functionAssociations: [{ function: spaRewrite, eventType: FunctionEventType.VIEWER_REQUEST }],
       },
@@ -82,6 +86,7 @@ export class WebStack extends Stack {
           // passes Authorization; Host is left out because API Gateway routes on its own host name.
           cachePolicy: CachePolicy.CACHING_DISABLED,
           originRequestPolicy: OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+          responseHeadersPolicy: ResponseHeadersPolicy.SECURITY_HEADERS,
           // No SPA rewrite here: that's for the default behavior only
         },
       },

@@ -47,8 +47,9 @@ Settled in `docs/plan.md` or with the user:
 5. Week plan and Draft meal plan stay in localStorage, keys bumped to **`v2`** and keyed by `sub`.
    Old `v1` drafts (int ids) are dropped.
 6. **Client-side dashboard guard** (UX only; the API enforces auth).
-7. Security headers move to a **CloudFront response headers policy** (static CSP, hashes instead of a
-   nonce).
+7. Security headers come from CloudFront's **managed** `SecurityHeadersPolicy` (the Free plan allows no
+   custom policy); the CSP is a per-page `<meta>` tag with script hashes, written at build
+   (`web/scripts/csp.ts`; confirmed with the user on 2026-11-01).
 
 Confirmed with the user on 2026-10-20:
 
