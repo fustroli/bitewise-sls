@@ -1,15 +1,19 @@
 // @vitest-environment jsdom
+
 import {
   IResourceForm,
   IResourceRecord,
 } from '@/app/(modules)/dashboard/(modules)/_resource-table/interfaces';
+import {
+  TestQueryProvider,
+  createTestQueryClient,
+} from '@/app/utils/testing/test-query-provider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 
 import InputField from '@/app/components/form/InputField';
 import ResourceFormDialog from '@/app/(modules)/dashboard/(modules)/_resource-table/components/ResourceFormDialog';
 import { TApiResult } from '@/app/utils/interfaces';
-import { TestQueryProvider } from '@/app/utils/testing/test-query-provider';
 import { copy as en } from '@/app/copy';
 import { toast } from '@/app/hooks/use-toast';
 import userEvent from '@testing-library/user-event';
@@ -46,9 +50,11 @@ const config: IResourceForm<IResourceRecord, TValues> = {
 
 const ID = '01JAZ3Q8V6X2M5N7P9R1S3T5W7';
 
+let queryClient = createTestQueryClient();
+
 const renderDialog = (record?: IResourceRecord, duplicate?: boolean) =>
   render(
-    <TestQueryProvider>
+    <TestQueryProvider client={queryClient}>
       <ResourceFormDialog
         config={config}
         record={record}
@@ -65,6 +71,7 @@ const nameInput = () => screen.getByRole<HTMLInputElement>('textbox');
 
 beforeEach(() => {
   vi.clearAllMocks();
+  queryClient = createTestQueryClient();
 });
 
 afterEach(cleanup);
@@ -194,5 +201,26 @@ describe('ResourceFormDialog', () => {
 
     expect(await screen.findByText(en.resourceTable.nameTaken)).toBeTruthy();
     expect(toast).not.toHaveBeenCalled();
+  });
+
+  it('marks the queries it lists stale after a save, and only on success', async () => {
+    const user = userEvent.setup();
+    const listKey = ['ingredients', 'list', {}];
+    const otherKey = ['meals', 'list', {}];
+    queryClient.setQueryData(listKey, { data: [], count: 0 });
+    queryClient.setQueryData(otherKey, { data: [], count: 0 });
+    const isStale = (key: unknown[]) =>
+      queryClient.getQueryState(key)?.isInvalidated;
+    create.mockResolvedValueOnce(FAILED).mockResolvedValueOnce(OK);
+    renderDialog();
+
+    await user.click(screen.getByRole('button', { name: ADD_TRIGGER }));
+    await user.type(nameInput(), 'Oats');
+    await user.click(screen.getByRole('button', { name: 'Add' }));
+    expect(isStale(listKey)).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: 'Add' }));
+    expect(isStale(listKey)).toBe(true);
+    expect(isStale(otherKey)).toBe(false);
   });
 });

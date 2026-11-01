@@ -204,6 +204,10 @@ domain after an upload).
 9. **Tests**: port the vitest suites that still apply (helpers, validations, hooks, components);
    action tests become tests of the query/mutation hooks against a mocked `api`.
 
+All nine steps are done (2026-11-01). The old suites for removed code (sessions, cookies, i18n,
+link-based email flows, the `[lang]` layout) were dropped; the port added tests for `AuthGate`, the
+sign-out notice, the Amplify-driven auth and profile forms, and cache invalidation after writes.
+
 ## Open questions
 
 - Pending email change: confirm what `GetUser` returns while a change is pending (the API returns
