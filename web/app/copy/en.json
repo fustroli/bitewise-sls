@@ -244,7 +244,8 @@
       "title": "Profile",
       "description": "Your photo and sign-in email.",
       "email": "Email",
-      "changePhoto": "Change photo"
+      "changePhoto": "Change photo",
+      "avatarSoon": "Profile photos are coming soon."
     },
     "menuOptions": {
       "profile": "Profile",
@@ -313,13 +314,10 @@
       "emailTitle": "Email",
       "emailDescription": "The address you sign in with.",
       "passwordTitle": "Password",
-      "passwordDescription": "Change the password you sign in with."
+      "passwordDescription": "Change the password you sign in with.",
+      "wrongPassword": "Your old password is incorrect."
     },
     "appearance": {
-      "language": "Language",
-      "languageDesc": "The language of BiteWise.",
-      "english": "English",
-      "hungarian": "Hungarian",
       "theme": "Theme",
       "themeDesc": "Light, dark, or as your device is set.",
       "light": "Light",
@@ -710,32 +708,18 @@
   "emailChange": {
     "current": "Current email: {email}",
     "newEmail": "New email address",
-    "currentPassword": "Current password",
-    "submit": "Change email",
-    "requested": "We sent confirmation links to {email} and your current address.",
-    "pending": "Pending: {email}, expires {expires}",
-    "resend": "Resend",
+    "submit": "Send code",
+    "requested": "We sent a code to {email}.",
+    "pending": "Enter the code we sent to {email}. Your current address stays until then.",
+    "code": "Code",
+    "codeRequired": "Enter the code from the email",
+    "confirm": "Change email",
+    "confirmed": "Your email address is now {email}.",
+    "resend": "Send a new code",
+    "resendIn": "Send a new code in {seconds}s",
     "cancel": "Cancel change",
     "cancelled": "Email change cancelled.",
-    "managedByGoogle": "Managed by Google",
-    "confirming": "Confirming your new email…",
-    "confirmedTitle": "Email changed",
-    "confirmedSignedOut": "Email changed, sign in with your new address.",
-    "confirmed": "Your email address was changed. Your other devices were signed out.",
-    "returnToSettings": "Return to settings",
-    "signIn": "Sign in",
-    "invalidTitle": "This link doesn't work",
-    "invalid": "This link is invalid or has expired.",
-    "takenTitle": "Address taken",
-    "taken": "Someone else registered this address in the meantime. Your email was not changed.",
-    "failedTitle": "Something went wrong",
-    "failed": "Something went wrong. Please try again later.",
-    "cancelTitle": "Cancel the email change?",
-    "cancelIntro": "Someone asked to change the email of your BiteWise account. Cancelling signs out all devices and clears your password.",
-    "cancelAction": "Cancel the change",
-    "cancelledTitle": "Change cancelled",
-    "setPassword": "Set a new password",
-    "cancelledDone": "The change was cancelled, all devices were signed out and your password was cleared. Set a new one to sign in."
+    "managedByGoogle": "Managed by Google"
   },
   "weekPlan": {
     "title": "Week plan",

@@ -19,7 +19,7 @@ const replace = vi.fn((href: string) =>
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ replace }),
-  usePathname: () => '/en/dashboard/meals',
+  usePathname: () => '/dashboard/meals',
 }));
 
 const SORT = { orderBy: 'name', orderDirection: EOrderDirection.ASC };
@@ -79,7 +79,7 @@ describe('ResourceSearch', () => {
     await wait(DEBOUNCE);
     expect(replace).toHaveBeenCalledTimes(1);
     expect(replace).toHaveBeenCalledWith(
-      '/en/dashboard/meals?page=1&orderBy=name&orderDirection=asc&search=oats',
+      '/dashboard/meals?page=1&orderBy=name&orderDirection=asc&search=oats',
       { scroll: false },
     );
   });
@@ -90,7 +90,7 @@ describe('ResourceSearch', () => {
 
     await user.type(searchBox(), 'rice{Enter}');
     expect(replace).toHaveBeenCalledWith(
-      '/en/dashboard/meals?page=1&orderBy=name&orderDirection=asc&search=rice',
+      '/dashboard/meals?page=1&orderBy=name&orderDirection=asc&search=rice',
       { scroll: false },
     );
 
@@ -118,7 +118,7 @@ describe('ResourceSearch', () => {
 
     expect(searchBox().value).toBe('');
     expect(replace).toHaveBeenCalledWith(
-      '/en/dashboard/meals?page=1&orderBy=name&orderDirection=asc',
+      '/dashboard/meals?page=1&orderBy=name&orderDirection=asc',
       { scroll: false },
     );
     expect(
@@ -134,7 +134,7 @@ describe('ResourceSearch', () => {
 
     expect(searchBox().value).toBe('');
     expect(replace).toHaveBeenCalledWith(
-      '/en/dashboard/meals?page=1&orderBy=name&orderDirection=asc',
+      '/dashboard/meals?page=1&orderBy=name&orderDirection=asc',
       { scroll: false },
     );
   });

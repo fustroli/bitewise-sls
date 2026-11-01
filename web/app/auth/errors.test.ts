@@ -12,6 +12,7 @@ describe('authErrorMessage', () => {
   it.each([
     ['NotAuthorizedException', text.incorrectCredentials],
     ['UsernameExistsException', text.emailTaken],
+    ['AliasExistsException', text.emailTaken],
     ['CodeMismatchException', text.codeMismatch],
     ['ExpiredCodeException', text.codeExpired],
     ['LimitExceededException', text.throttled],
@@ -45,4 +46,15 @@ describe('authErrorMessage', () => {
       expect(authErrorMessage(error)).toBe(text.failed);
     },
   );
+
+  it('lets a caller word an exception for its context', () => {
+    const error = cognitoError(
+      'NotAuthorizedException',
+      'Incorrect username or password.',
+    );
+
+    expect(
+      authErrorMessage(error, { NotAuthorizedException: 'Wrong old password' }),
+    ).toBe('Wrong old password');
+  });
 });

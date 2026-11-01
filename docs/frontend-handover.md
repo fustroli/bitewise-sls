@@ -66,6 +66,13 @@ Confirmed with the user on 2026-10-20:
 11. Keep the **`TApiResult`** result type (`{ok:true,data} | {ok:false,status,message}`) for mutations,
     so `toastResult()`, `ResourceFormDialog`'s 409 → field error and the banner logic port unchanged.
 
+Confirmed with the user on 2026-11-01:
+
+12. **Email change without a password check** (accepted downgrade). Amplify refuses `signIn` while
+    signed in and the client is SRP-only, so there's no simple re-authentication. The change is
+    `updateUserAttributes` → code to the new address → `confirmUserAttribute`; the current address
+    stays until then. The pending address is kept in localStorage (`bitewise:pending-email:v1:<sub>`).
+
 ## Server dependencies and their replacements
 
 | Old (server) | New (static SPA) |
@@ -103,7 +110,7 @@ names before coding (don't trust memory).
 | Google button → backend `/auth/google/login` | `signInWithRedirect({ provider: 'Google' })`; Cognito comes back to `/` with `?code=`, Amplify finishes it; on success go to `/dashboard/`. `?error=` from Cognito shows a notice |
 | Forgot password → link mail → `/reset-password?token=` (signed out everywhere) | `/forgot-password/`: `resetPassword({ username })` → code + new password on the same page → `confirmResetPassword`, then sign in. No global sign-out (decision 10). `/reset-password/` goes away |
 | Change password (signed out other sessions) | `updatePassword`; the session stays, other devices aren't signed out (decision 10). No "password changed" mail |
-| Email change: password + links to new/old address | Re-authenticate (`signIn` with the current password), `updateUserAttributes({ email })` → code step `confirmUserAttribute({ userAttributeKey: 'email', confirmationCode })`. No mail to the old address, no cancel link. Track "pending" in component state / localStorage |
+| Email change: password + links to new/old address | `updateUserAttributes({ email })` → code step `confirmUserAttribute({ userAttributeKey: 'email', confirmationCode })`, no password check (decision 12). No mail to the old address, no cancel link. "Pending" lives in localStorage |
 | `/verify-email`, `/confirm-email-change`, `/cancel-email-change` | Delete (codes in-app) |
 | Sign-out route | `signOut()`; clear TanStack cache; go to `/` |
 | Delete account (`DELETE users/me` → `/signout?reason=account-deleted`) | `DELETE /api/users/me` (deletes data and the Cognito user), then `signOut()` locally, go to `/?reason=account-deleted` |

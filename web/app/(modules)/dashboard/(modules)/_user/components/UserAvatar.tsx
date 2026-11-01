@@ -17,7 +17,7 @@ interface IUserAvatarProps {
 /** The User's avatar, or their initials on a coloured background without one. */
 const UserAvatar = ({ user, className }: IUserAvatarProps) => (
   <Avatar className={className}>
-    <AvatarImage src={user.avatarUrl} alt="" />
+    <AvatarImage src={user.avatarUrl ?? undefined} alt="" />
     {/* Inherits the Avatar's corners, so a square Avatar keeps them. */}
     <AvatarFallback className="rounded-[inherit] bg-primary font-medium text-primary-foreground">
       {avatarInitials(user)}

@@ -45,15 +45,11 @@ export interface IUser {
   emailVerified?: boolean;
   /** False for a User who only signs in with Google; they can't change email. */
   hasPassword?: boolean;
-  /** The unconfirmed new address of a pending Email change. */
-  pendingEmail?: string | null;
-  /** ISO date-time the pending Email change expires. */
-  pendingEmailExpiresAt?: string | null;
   personalInformation?: IPersonalInformation;
   socialProfiles?: ISocialProfiles;
   bodyStats?: IBodyStats;
   targets?: ITargets;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
 }
 
 /** A partial update of the User's Profile, as sent to the backend. */
@@ -62,9 +58,4 @@ export interface IUserChange {
   socialProfiles?: ISocialProfiles;
   bodyStats?: Partial<IBodyStats>;
   targets?: Partial<ITargets>;
-}
-
-export interface IEmailChangeRequest {
-  newEmail: string;
-  password: string;
 }
