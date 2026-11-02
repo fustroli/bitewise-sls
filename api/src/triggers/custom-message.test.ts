@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import type { Context, CustomMessageTriggerEvent } from 'aws-lambda';
 
-process.env.APP_URL = 'https://sls.bitewise.rolandfuest.com';
+process.env.APP_URL = 'https://bitewise.rolandfuest.com';
 const { handler } = await import('./custom-message');
 
 function event(triggerSource: CustomMessageTriggerEvent['triggerSource']): CustomMessageTriggerEvent {
@@ -22,7 +22,7 @@ describe('custom-message', () => {
     expect(response.emailSubject).toBe('Verify your BiteWise email');
     expect(response.emailMessage).toContain('{####}');
     expect(response.emailMessage).toContain('Confirm your email');
-    expect(response.emailMessage).toContain('BiteWise · sls.bitewise.rolandfuest.com');
+    expect(response.emailMessage).toContain('BiteWise · bitewise.rolandfuest.com');
   });
 
   test.each([
