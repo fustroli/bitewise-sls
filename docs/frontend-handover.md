@@ -14,7 +14,7 @@ section 5), `CONTEXT.md`, and the old app's `CLAUDE.md`, `docs/adr/0001-0006`.
 | API (`/api/ingredient`, `/api/meal`, `/api/meal-plan`, `/api/users/me`) | Live behind CloudFront `/api/*`, JWT authorizer `cognito`. Same paths, query params, response shapes and error bodies as the EC2 app, except the differences below |
 | Cognito | Pool `us-east-1_mxizFmjKZ`, public client `3ar8dsh33uocuk57aml6imi8qr` (SRP + refresh, code grant + PKCE, scopes `openid email profile aws.cognito.signin.user.admin`), domain `https://us-east-1mxizfmjkz.auth.us-east-1.amazoncognito.com`, Google IdP, branded code emails |
 | Hosting | Bucket `bitewise-sls-web-<account-id>`, distribution `E2ZKU5BXWC1GD9`, SPA rewrite Function maps `/x` and `/x/` to `/x/index.html` (needs `trailingSlash: true`) |
-| Callback / sign-out URLs registered | `https://sls.bitewise.rolandfuest.com/` and `http://localhost:3000/` |
+| Callback / sign-out URLs registered | `https://bitewise.rolandfuest.com/` and `http://localhost:3000/` |
 | Avatar upload | `POST /api/users/me/avatar-upload` → presigned POST straight to S3 → poll `users/me` until `avatarUrl` changes (`uploadAvatar` in `_user/queries`); no change within 20 s reads as a rejected image |
 
 ### API differences the frontend must absorb
@@ -125,7 +125,7 @@ Error messages to map: Cognito exceptions (`NotAuthorizedException` "Incorrect u
 Amplify config (`Amplify.configure`, once, client-side):
 
 - `userPoolId`, `userPoolClientId`, `loginWith.oauth`: `domain` (without `https://`), `scopes` (the
-  four above), `redirectSignIn` / `redirectSignOut` (`https://sls.bitewise.rolandfuest.com/`,
+  four above), `redirectSignIn` / `redirectSignOut` (`https://bitewise.rolandfuest.com/`,
   `http://localhost:3000/`), `responseType: 'code'`.
 - Token storage: the default localStorage store.
 

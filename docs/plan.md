@@ -2,8 +2,8 @@
 
 Status: draft, revised 2026-10-15 against the final EC2 app (backend `53176af`, frontend `54c771c`).
 Replaces the single-EC2 stack (Next.js + NestJS + MySQL on one box), built side by side first.
-Region: `us-east-1`. Domain: `bitewise.rolandfuest.com` (DNS stays at Namecheap); the new stack runs on
-`sls.bitewise.rolandfuest.com`. Build order and console steps: `infra/runbook.md`.
+Region: `us-east-1`. Domain: `bitewise.rolandfuest.com` (DNS stays at Namecheap). It was built on
+`sls.bitewise.rolandfuest.com` and moved over after the EC2 app was torn down. Build order and console steps: `infra/runbook.md`.
 
 Domain terms (Owner, Owned resource, Meal ingredient, Calorie target, Macro plan, …) follow
 `bitewise-backend/CONTEXT.md`; copy it into this repo in phase 1.

@@ -2,7 +2,7 @@ import { PHASE_DEVELOPMENT_SERVER } from 'next/constants.js';
 
 // Where `next dev` sends `/api/*`: the deployed API, behind CloudFront.
 const DEV_API_ORIGIN =
-  process.env.DEV_API_ORIGIN || 'https://sls.bitewise.rolandfuest.com';
+  process.env.DEV_API_ORIGIN || 'https://bitewise.rolandfuest.com';
 
 /**
  * Static export: `next build` writes `out/`, which goes to the web bucket.

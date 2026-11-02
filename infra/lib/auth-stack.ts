@@ -21,7 +21,7 @@ import type { Construct } from 'constructs';
 import { BitewiseFunction } from './bitewise-function';
 
 export interface AuthStackProps extends StackProps {
-  /** App domain, e.g. sls.bitewise.rolandfuest.com; callback, sign-out and email links. */
+  /** App domain, e.g. bitewise.rolandfuest.com; callback, sign-out and email links. */
   domainName: string;
   table: TableV2;
 }

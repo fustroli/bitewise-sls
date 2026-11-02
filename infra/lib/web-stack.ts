@@ -31,7 +31,7 @@ import {
 import type { Construct } from 'constructs';
 
 export interface WebStackProps extends StackProps {
-  /** App domain, e.g. sls.bitewise.rolandfuest.com. DNS lives at Namecheap. */
+  /** App domain, e.g. bitewise.rolandfuest.com. DNS lives at Namecheap. */
   domainName: string;
   /** Served under /api/* on the same domain, so the browser needs no CORS. */
   api: HttpApi;
