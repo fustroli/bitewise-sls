@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
 import { CognitoIdentityProviderClient, DeleteUserCommand, GetUserCommand } from '@aws-sdk/client-cognito-identity-provider';
 import { TransactionCanceledException } from '@aws-sdk/client-dynamodb';
+import { DeleteObjectsCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import {
   BatchWriteCommand,
   DynamoDBDocumentClient,
@@ -14,8 +15,12 @@ import { mockClient } from 'aws-sdk-client-mock';
 import type { ApiEvent, ApiResult } from '../lib/http';
 
 process.env.TABLE_NAME = 'bitewise-sls';
+process.env.AVATAR_BUCKET = 'avatars-bucket';
+// Presigning signs locally, so it needs a region and credentials (fake ones are fine)
+Object.assign(process.env, { AWS_REGION: 'us-east-1', AWS_ACCESS_KEY_ID: 'AKIATEST', AWS_SECRET_ACCESS_KEY: 'secret' });
 const ddb = mockClient(DynamoDBDocumentClient);
 const cognito = mockClient(CognitoIdentityProviderClient);
+const s3 = mockClient(S3Client);
 const { handler } = await import('./users');
 
 const OWNER = 'owner-sub';
@@ -58,6 +63,7 @@ describe('users', () => {
   beforeEach(() => {
     ddb.reset();
     cognito.reset();
+    s3.reset();
   });
 
   describe('GET /api/users/me', () => {
@@ -160,13 +166,42 @@ describe('users', () => {
       ],
     });
     ddb.on(BatchWriteCommand).resolves({});
+    s3.on(ListObjectsV2Command).resolves({ Contents: [{ Key: `avatars/${OWNER}/01J0AT5AAAAAAAAAAAAAAAAAAA.webp` }] });
+    s3.on(DeleteObjectsCommand).resolves({});
     cognito.on(DeleteUserCommand).resolves({});
     const result = await request('DELETE', '/api/users/me');
 
     expect(result.statusCode).toBe(204);
+    expect(s3.commandCalls(ListObjectsV2Command)[0]!.args[0].input).toMatchObject({ Bucket: 'avatars-bucket', Prefix: `avatars/${OWNER}/` });
+    expect(s3.commandCalls(DeleteObjectsCommand)[0]!.args[0].input.Delete!.Objects).toEqual([
+      { Key: `avatars/${OWNER}/01J0AT5AAAAAAAAAAAAAAAAAAA.webp` },
+    ]);
     const deleted = ddb.commandCalls(BatchWriteCommand)[0]!.args[0].input.RequestItems!['bitewise-sls']!.map((r) => r.DeleteRequest!.Key);
     expect(deleted).toContainEqual({ PK: 'USERNAME#ann', SK: 'USERNAME' });
     expect(deleted).toHaveLength(4);
     expect(cognito.commandCalls(DeleteUserCommand)[0]!.args[0].input).toEqual({ AccessToken: 'access-token' });
+  });
+
+  describe('POST /api/users/me/avatar-upload', () => {
+    test('presigns a POST to uploads/<sub>/<ulid>, pinned to the type and 5 MB', async () => {
+      const result = await request('POST', '/api/users/me/avatar-upload', { contentType: 'image/png' });
+
+      expect(result.statusCode).toBe(201);
+      const { url, fields } = body(result);
+      expect(url).toContain('avatars-bucket');
+      expect(fields.key).toMatch(new RegExp(`^uploads/${OWNER}/[0-9A-HJKMNP-TV-Z]{26}$`));
+      expect(fields['Content-Type']).toBe('image/png');
+      const policy = JSON.parse(Buffer.from(fields.Policy, 'base64').toString('utf8'));
+      expect(policy.conditions).toContainEqual(['content-length-range', 1, 5 * 1024 * 1024]);
+      expect(policy.conditions).toContainEqual(['eq', '$Content-Type', 'image/png']);
+      expect(policy.conditions).toContainEqual({ key: fields.key });
+    });
+
+    test('other types get the EC2 app message', async () => {
+      const result = await request('POST', '/api/users/me/avatar-upload', { contentType: 'image/gif' });
+
+      expect(result.statusCode).toBe(400);
+      expect(body(result).message).toEqual(['Avatar must be a JPEG, PNG or WebP image']);
+    });
   });
 });

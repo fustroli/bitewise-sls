@@ -4,6 +4,8 @@ import {
   DeleteUserCommand,
   GetUserCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
+import { DeleteObjectsCommand, paginateListObjectsV2 } from '@aws-sdk/client-s3';
+import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import {
   BatchWriteCommand,
   type BatchWriteCommandOutput,
@@ -11,7 +13,16 @@ import {
   QueryCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { PROFILE_GROUPS, type ProfileGroup, profilePatchSchema } from '@bitewise/shared';
+import {
+  AVATAR_MAX_BYTES,
+  type AvatarUpload,
+  avatarUploadSchema,
+  PROFILE_GROUPS,
+  type ProfileGroup,
+  profilePatchSchema,
+} from '@bitewise/shared';
+import { ulid } from 'ulidx';
+import { AVATAR_BUCKET, avatarPrefix, s3, uploadKey } from '../lib/avatar';
 import { ddb, TABLE_NAME } from '../lib/ddb';
 import { type ApiEvent, type ApiResult, conflict, json, jsonBody, noContent, notFound } from '../lib/http';
 import type { ProfileItem } from '../lib/items';
@@ -23,8 +34,10 @@ import { type TransactItem, transact } from '../lib/writes';
 const logger = new Logger({ serviceName: 'users' });
 // Module scope: reused across warm invocations
 const cognito = new CognitoIdentityProviderClient({});
-// Where /avatars/* is served (CloudFront); avatars arrive in runbook section 6
+// The app origin: CloudFront serves the avatar bucket's avatars/ under /avatars/*
 const AVATAR_BASE_URL = process.env.AVATAR_BASE_URL;
+// How long the browser has to start the upload
+const AVATAR_UPLOAD_EXPIRES_SECONDS = 5 * 60;
 
 const GROUPS = Object.keys(PROFILE_GROUPS) as ProfileGroup[];
 const profileKey = (owner: string) => ({ PK: ownerKey(owner), SK: 'PROFILE' });
@@ -143,6 +156,28 @@ async function updateMe({ event, owner }: Request, retried = false): Promise<Api
   return json(200, await serialize(event, owner, { ...merged, updatedAt: now }));
 }
 
+/**
+ * A presigned POST straight to S3: the file never passes through the Lambda (API Gateway caps
+ * payloads at 10 MB anyway). S3 enforces the key, type and size; the avatar-processor Lambda
+ * re-encodes the upload and sets `avatarKey`, so the client polls GET /users/me for the new avatarUrl.
+ */
+async function avatarUpload({ event, owner }: Request) {
+  const { contentType } = parse(avatarUploadSchema, jsonBody(event));
+  const key = uploadKey(owner, ulid());
+  const { url, fields } = await createPresignedPost(s3, {
+    Bucket: AVATAR_BUCKET,
+    Key: key,
+    Conditions: [
+      ['content-length-range', 1, AVATAR_MAX_BYTES],
+      ['eq', '$Content-Type', contentType],
+    ],
+    Fields: { 'Content-Type': contentType },
+    Expires: AVATAR_UPLOAD_EXPIRES_SECONDS,
+  });
+  const upload: AvatarUpload = { url, fields };
+  return json(201, upload);
+}
+
 /** Dashboard counts of the User's Owned resources: one COUNT query each. */
 async function statistics({ owner }: Request) {
   const count = async (kind: Kind) => {
@@ -194,10 +229,18 @@ async function deleteMe({ event, owner }: Request) {
   } while (start);
 
   await batchDelete(keys);
-  // TODO(runbook section 6): delete the User's avatar objects from the avatar bucket
+  await deleteAvatars(owner);
   await cognito.send(new DeleteUserCommand({ AccessToken: accessToken(event) }));
   logger.info('Account deleted', { owner, items: keys.length });
   return noContent();
+}
+
+/** Every avatar object of the Owner (normally one); in-flight uploads expire by lifecycle. */
+async function deleteAvatars(owner: string): Promise<void> {
+  for await (const page of paginateListObjectsV2({ client: s3 }, { Bucket: AVATAR_BUCKET, Prefix: avatarPrefix(owner) })) {
+    const objects = (page.Contents ?? []).map(({ Key }) => ({ Key }));
+    if (objects.length) await s3.send(new DeleteObjectsCommand({ Bucket: AVATAR_BUCKET, Delete: { Objects: objects, Quiet: true } }));
+  }
 }
 
 /** BatchWriteItem takes 25 requests per call; throttled ones come back and are retried. */
@@ -218,6 +261,7 @@ export const handler = router(
   {
     'GET /api/users/me': getMe,
     'GET /api/users/me/statistics': statistics,
+    'POST /api/users/me/avatar-upload': avatarUpload,
     'PATCH /api/users/me': (request) => updateMe(request),
     'DELETE /api/users/me': deleteMe,
   },

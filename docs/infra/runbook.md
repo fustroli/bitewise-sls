@@ -124,12 +124,37 @@ Plan, decisions and port order: `docs/frontend-handover.md`.
 
 ## 6. Avatars
 
-- [ ] `POST /api/users/me/avatar-upload` returns a presigned POST to `uploads/<sub>/<ulid>`
-- [ ] Bucket CORS: allow `POST` from the app domain
-- [ ] S3 event (`ObjectCreated`, prefix `uploads/`) → re-encode Lambda (`sharp`, arm64) →
-      `avatars/<sub>/<ulid>.webp`, update profile, delete upload + previous avatar
-- [ ] CloudFront behavior `/avatars/*` → avatar bucket with OAC
-- [ ] CDK: add to `Data`/`Api` stacks
+Code: `POST /api/users/me/avatar-upload` in `api/src/handlers/users.ts`, re-encode Lambda in
+`api/src/triggers/avatar-processor.ts`, key layout in `api/src/lib/avatar.ts`. `bun run build` in
+`api/` → `dist/users.zip`, `dist/avatar-processor.zip` (bundles `sharp`'s Linux arm64 binaries).
+
+- [x] Users Lambda: upload the new `users.zip`; env `AVATAR_BUCKET` = avatar bucket name,
+      `AVATAR_BASE_URL` = `https://sls.bitewise.rolandfuest.com`; inline policy `users-avatars`:
+      `s3:PutObject` on `<avatar-bucket-arn>/uploads/*` (the presigned POST is signed with the role's
+      credentials, so the role needs the permission it hands out), `s3:DeleteObject` on
+      `<avatar-bucket-arn>/avatars/*`, `s3:ListBucket` on the bucket ARN with `s3:prefix` like `avatars/*` (account deletion lists `avatars/<sub>/`)
+- [x] Route `POST /api/users/me/avatar-upload` → existing users integration, `cognito` authorizer
+      (wins over `/{proxy+}` as the more specific route); `$default` route throttling 2 rps, burst 5 (CLI only, see Gotchas)
+- [x] Avatar bucket CORS (Permissions → CORS): `POST` from the app domain and `http://localhost:3000`,
+      `AllowedHeaders ["*"]`, `MaxAgeSeconds 3000`. The browser posts straight to the bucket's
+      `s3.us-east-1.amazonaws.com` host, a different origin
+- [x] Lambda `bitewise-sls-avatar-processor`: Event function, Node 22 arm64, **1024 MB** (CPU scales with
+      memory; sharp is CPU-bound), 30 s, env `TABLE_NAME`, `AVATAR_BUCKET`, code `avatar-processor.zip`;
+      inline policy `avatar-processor`: `s3:GetObject` + `s3:DeleteObject` on `uploads/*`, `s3:PutObject` +
+      `s3:DeleteObject` on `avatars/*`, `dynamodb:UpdateItem` on the table; log retention 14 days
+- [x] S3 event notification (avatar bucket → Properties → Event notifications): `avatar-uploaded`, prefix
+      `uploads/`, all object create events → the Lambda. The console adds the Lambda's resource-based
+      policy (`s3.amazonaws.com` may invoke). Writes go to `avatars/`, so no recursive trigger
+- [x] CloudFront: origin = avatar bucket REST endpoint with OAC (the web bucket's OAC is reusable: an
+      OAC is only signing settings); bucket policy allows the distribution `s3:GetObject` on `avatars/*`
+      only. Behavior `/avatars/*`: HTTPS only, GET/HEAD, `CachingOptimized`, no origin request policy,
+      `SecurityHeadersPolicy`, no function association
+- [x] Verify with curl: POST `/api/users/me/avatar-upload` `{"contentType":"image/jpeg"}` → POST the
+      returned `fields` + `file` (last) to `url` → 204 → `GET /api/users/me` shows `avatarUrl` within
+      seconds → it loads through CloudFront; a 6 MB file gets S3's `EntityTooLarge`
+- [ ] Web: avatar upload on the profile page (crop → presigned POST → poll `/users/me`); CSP
+      `connect-src` allows the bucket host
+- [ ] CDK: CORS + notification in `Data`, Lambda + route + route throttle in `Api`, `/avatars/*` in `Web`
 
 ## 7. Ops + CI
 
@@ -170,6 +195,15 @@ Plan, decisions and port order: `docs/frontend-handover.md`.
   the actual address goes in "FROM sender name" as `BiteWise <no-reply@rolandfuest.com>`.
 - CDK `TableV2` synthesizes `AWS::DynamoDB::GlobalTable` (one replica), not the
   `AWS::DynamoDB::Table` the console creates. Same table to the app; only matters for `cdk import`.
+
+- HTTP API route throttling can't be created in the console ("Use the CLI or an SDK to create custom
+  route settings"); the console only edits existing ones. Created once from CloudShell with
+  `aws apigatewayv2 update-stage --route-settings`.
+- A trailing space pasted into `AVATAR_BUCKET` (both Lambdas): S3 `InvalidBucketName` with
+  `"BucketName":"bitewise-sls-avatars-… "`, and the presigned URL turned path-style ending in `%20`. The
+  processor's memory edit (1024 MB) also hadn't saved: `REPORT` lines show `Memory Size`, check them.
+- A deleted avatar stays reachable from CloudFront's edge cache (`CachingOptimized`, up to a year; the
+  query string isn't in the cache key, so `?v=` doesn't bypass it). Its URL is never referenced again.
 
 ## Differs from `docs/plan.md`
 

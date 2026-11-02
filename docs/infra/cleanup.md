@@ -13,9 +13,14 @@ Keep (shared with the EC2 app): SES identity `rolandfuest.com`, SNS topic `bitew
 
 ## 6. Avatars
 
-- [ ] S3 event notification on the avatar bucket
-- [ ] Re-encode Lambda + its execution role + `/aws/lambda/<name>` log group
-- [ ] CloudFront `/avatars/*` behavior (removed with the distribution in step 2)
+- [ ] S3 event notification `avatar-uploaded` on the avatar bucket
+- [ ] Lambda `bitewise-sls-avatar-processor` (its S3 invoke permission goes with it) +
+      `/aws/lambda/bitewise-sls-avatar-processor` log group
+- [ ] Its IAM role `bitewise-sls-avatar-processor-role-meslxdcp` (inline policy `avatar-processor` goes with it)
+- [ ] Users Lambda: inline policy `users-avatars` (goes with the role in step 4)
+- [ ] Route `POST /api/users/me/avatar-upload` + its route throttling (go with the HTTP API in step 4)
+- [ ] Avatar bucket CORS + `avatars/*` bucket policy (go with the bucket in step 1)
+- [ ] CloudFront `/avatars/*` behavior + avatar bucket origin (removed with the distribution in step 2)
 
 ## 5. Frontend
 
