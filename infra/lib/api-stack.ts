@@ -112,9 +112,10 @@ export class ApiStack extends Stack {
 
         // Its own route so it can have its own throttle; wins over /{proxy+} as the more specific path
         const [route] = this.api.addRoutes({ path: AVATAR_UPLOAD_ROUTE, methods: [HttpMethod.POST], integration, authorizer });
-        // HttpStage has no route settings: escape hatch to the CloudFormation stage
+        // HttpStage has no route settings: escape hatch to the CloudFormation stage. RouteSettings is raw
+        // JSON to CDK, so the keys go to CloudFormation as written and must be PascalCase.
         (stage.node.defaultChild as CfnStage).routeSettings = {
-          [`POST ${AVATAR_UPLOAD_ROUTE}`]: { throttlingRateLimit: 2, throttlingBurstLimit: 5 },
+          [`POST ${AVATAR_UPLOAD_ROUTE}`]: { ThrottlingRateLimit: 2, ThrottlingBurstLimit: 5 },
         };
         // The route key must exist before the stage refers to it
         stage.node.addDependency(route!);
