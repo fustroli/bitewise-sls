@@ -133,17 +133,50 @@ describe('Profile section cycle', () => {
 });
 
 describe('Avatar', () => {
+  beforeEach(() => {
+    vi.mocked(toast).mockClear();
+  });
+
   afterEach(cleanup);
 
-  it('cannot be changed until avatar uploads exist', () => {
-    renderWithUser(<BasicInfo />, USER, vi.fn());
+  it('uploads the picked image and shows the new avatar', async () => {
+    const user = userEvent.setup();
+    const withAvatar = {
+      ...USER,
+      avatarUrl: 'https://app.example/avatars/new.webp',
+    };
+    const uploadAvatar = vi
+      .fn<IUserActions['uploadAvatar']>()
+      .mockResolvedValue({
+        ok: true,
+        data: withAvatar,
+      });
+    render(
+      <TestQueryProvider seed={[[ME_KEY, { ...USER, avatarUrl: null }]]}>
+        <UserProvider actions={{ uploadAvatar }}>
+          <BasicInfo />
+        </UserProvider>
+      </TestQueryProvider>,
+    );
 
+    await user.click(
+      screen.getByRole('button', { name: en.profile.basic.changePhoto }),
+    );
+    const photo = new File(['jpeg'], 'me.jpg', { type: 'image/jpeg' });
+    await user.upload(
+      document.querySelector<HTMLInputElement>('input[type=file]')!,
+      photo,
+    );
+    await user.click(screen.getByRole('button', { name: common.upload }));
+
+    expect(uploadAvatar).toHaveBeenCalledWith(photo, null);
+    expect(toast).toHaveBeenCalledWith({
+      variant: 'success',
+      description: common.savedSuccessfully,
+    });
     expect(
-      screen.getByRole<HTMLButtonElement>('button', {
-        name: en.profile.basic.changePhoto,
-      }).disabled,
-    ).toBe(true);
-    expect(screen.getByText(en.profile.basic.avatarSoon)).toBeTruthy();
+      screen.getByRole('button', { name: en.profile.basic.changePhoto }),
+    ).toBeTruthy();
   });
 });
 

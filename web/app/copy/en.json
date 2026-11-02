@@ -244,8 +244,7 @@
       "title": "Profile",
       "description": "Your photo and sign-in email.",
       "email": "Email",
-      "changePhoto": "Change photo",
-      "avatarSoon": "Profile photos are coming soon."
+      "changePhoto": "Change photo"
     },
     "menuOptions": {
       "profile": "Profile",

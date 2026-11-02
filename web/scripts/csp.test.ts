@@ -19,12 +19,16 @@ describe('inlineScriptHashes', () => {
 });
 
 describe('buildCsp', () => {
-  it('allows only our own scripts, the hashed inline ones and Cognito', () => {
-    const csp = buildCsp(["'sha256-abc'"], 'auth.example.com');
+  it('allows only our own scripts, the hashed inline ones, Cognito and the avatar bucket', () => {
+    const csp = buildCsp(
+      ["'sha256-abc'"],
+      'auth.example.com',
+      'https://avatars.s3.example.com',
+    );
 
     expect(csp).toContain("script-src 'self' 'sha256-abc';");
     expect(csp).toContain(
-      "connect-src 'self' https://cognito-idp.us-east-1.amazonaws.com https://auth.example.com;",
+      "connect-src 'self' https://cognito-idp.us-east-1.amazonaws.com https://auth.example.com https://avatars.s3.example.com;",
     );
     expect(csp).not.toContain('unsafe-eval');
     // Ignored in a meta tag; X-Frame-Options covers it.
@@ -34,7 +38,11 @@ describe('buildCsp', () => {
 
 describe('withCspMeta', () => {
   it('puts the policy first in the head, before any script', () => {
-    const html = withCspMeta(PAGE, 'auth.example.com');
+    const html = withCspMeta(
+      PAGE,
+      'auth.example.com',
+      'https://avatars.s3.example.com',
+    );
     const meta = html.indexOf('http-equiv="Content-Security-Policy"');
 
     expect(meta).toBeGreaterThan(html.indexOf('<head>'));
@@ -43,8 +51,14 @@ describe('withCspMeta', () => {
   });
 
   it('replaces the policy of an earlier run instead of adding another', () => {
-    const once = withCspMeta(PAGE, 'auth.example.com');
+    const once = withCspMeta(
+      PAGE,
+      'auth.example.com',
+      'https://avatars.s3.example.com',
+    );
 
-    expect(withCspMeta(once, 'auth.example.com')).toBe(once);
+    expect(
+      withCspMeta(once, 'auth.example.com', 'https://avatars.s3.example.com'),
+    ).toBe(once);
   });
 });

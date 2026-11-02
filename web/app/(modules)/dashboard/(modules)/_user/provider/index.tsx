@@ -17,8 +17,8 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { TApiResult } from '@/app/utils/interfaces';
 
 interface IProps extends PropsWithChildren {
-  /** The API calls to make; tests pass fakes. */
-  actions?: IUserActions;
+  /** The API calls to make; tests pass fakes for the ones they use. */
+  actions?: Partial<IUserActions>;
 }
 
 const { ME_KEY, meQuery } = userQueries;
@@ -28,9 +28,13 @@ const { ME_KEY, meQuery } = userQueries;
  * the calls that change them, which write the result back to that query.
  */
 export const UserProvider: React.FC<IProps> = ({
-  actions = userQueries,
+  actions: overrides,
   children,
 }) => {
+  const actions = useMemo<IUserActions>(
+    () => ({ ...userQueries, ...overrides }),
+    [overrides],
+  );
   const queryClient = useQueryClient();
   const { data: user } = useSuspenseQuery(meQuery);
 
@@ -87,6 +91,8 @@ export const UserProvider: React.FC<IProps> = ({
     () => ({
       user,
       updateUser: async (change) => apply(await actions.updateUser(change)),
+      uploadAvatar: async (file) =>
+        apply(await actions.uploadAvatar(file, user.avatarUrl ?? null)),
       updateTargets,
     }),
     [user, actions, apply, updateTargets],

@@ -4,6 +4,7 @@ import {
 } from '@/app/(modules)/dashboard/(modules)/_user/constants';
 import { z } from 'zod';
 
+/** What the presigned POST accepts; the form checks the same with friendlier messages. */
 export const avatarFileSchema = z
   .file()
   .min(1)

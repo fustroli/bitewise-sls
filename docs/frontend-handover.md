@@ -15,7 +15,7 @@ section 5), `CONTEXT.md`, and the old app's `CLAUDE.md`, `docs/adr/0001-0006`.
 | Cognito | Pool `us-east-1_mxizFmjKZ`, public client `3ar8dsh33uocuk57aml6imi8qr` (SRP + refresh, code grant + PKCE, scopes `openid email profile aws.cognito.signin.user.admin`), domain `https://us-east-1mxizfmjkz.auth.us-east-1.amazoncognito.com`, Google IdP, branded code emails |
 | Hosting | Bucket `bitewise-sls-web-<account-id>`, distribution `E2ZKU5BXWC1GD9`, SPA rewrite Function maps `/x` and `/x/` to `/x/index.html` (needs `trailingSlash: true`) |
 | Callback / sign-out URLs registered | `https://sls.bitewise.rolandfuest.com/` and `http://localhost:3000/` |
-| Not built yet | Avatar upload (section 6): `POST /api/users/me/avatar-upload` doesn't exist; the avatar UI stays disabled until then |
+| Avatar upload | `POST /api/users/me/avatar-upload` → presigned POST straight to S3 → poll `users/me` until `avatarUrl` changes (`uploadAvatar` in `_user/queries`); no change within 20 s reads as a rejected image |
 
 ### API differences the frontend must absorb
 
@@ -174,8 +174,9 @@ Start from the old `csp.ts` and remove the nonce:
 
 ## Build and deploy
 
-- Env (build-time, `NEXT_PUBLIC_*`): user pool id, client id, Cognito domain, avatar base URL
-  (section 6). The API is always `/api`.
+- Env (build-time, `NEXT_PUBLIC_*`): user pool id, client id, Cognito domain. The API is always
+  `/api`; `avatarUrl` comes absolute from the API. Build-only `AVATAR_UPLOAD_ORIGIN` (the avatar
+  bucket's `https://<bucket>.s3.us-east-1.amazonaws.com`) goes into the CSP's `connect-src`.
 - `bun run build` in `web/` → `web/out/`; upload to the web bucket (replace the placeholder), then a
   CloudFront invalidation `/*`. CI (section 7) automates this later.
 - Each page must exist as `out/<route>/index.html` for the SPA rewrite Function.
@@ -197,8 +198,8 @@ domain after an upload).
 5. **Resources**: `_resource-table` as client components; ingredients → meals → meal plans (forms,
    dialogs, delete with the 409 messages).
 6. **Draft meal plan, week plan, compare**: localStorage `v2`, `useRecordCache` over the fetch client.
-7. **Profile**: groups PATCH, change password, email change with code, delete account; avatar UI
-   disabled until section 6.
+7. **Profile**: groups PATCH, change password, email change with code, delete account; avatar upload
+   (section 6).
 8. **Headers + deploy**: response headers policy (compute hashes from the build), upload, invalidate,
    smoke test on the app domain.
 9. **Tests**: port the vitest suites that still apply (helpers, validations, hooks, components);

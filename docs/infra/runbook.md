@@ -113,7 +113,7 @@ Plan, decisions and port order: `docs/frontend-handover.md`.
       `trailingSlash: true` (the SPA rewrite Function expects `/x/index.html` files)
 - [x] Fetch client + TanStack Query, Amplify Auth, client-side guard on dashboard
 - [x] Build-time env (`web/.env.example`): pool/client ids, Cognito domain; the API is always `/api`.
-      Avatar URL comes with section 6
+      Section 6 adds build-only `AVATAR_UPLOAD_ORIGIN` for the CSP
 - [x] Response headers: the Free flat-rate plan allows only **managed** policies. Attach
       `SecurityHeadersPolicy` (HSTS, nosniff, X-Frame-Options SAMEORIGIN, Referrer-Policy) to the default
       behavior and to `/api/*` (Distribution → Behaviors → Edit → Response headers policy). The CSP ships
@@ -152,8 +152,8 @@ Code: `POST /api/users/me/avatar-upload` in `api/src/handlers/users.ts`, re-enco
 - [x] Verify with curl: POST `/api/users/me/avatar-upload` `{"contentType":"image/jpeg"}` → POST the
       returned `fields` + `file` (last) to `url` → 204 → `GET /api/users/me` shows `avatarUrl` within
       seconds → it loads through CloudFront; a 6 MB file gets S3's `EntityTooLarge`
-- [ ] Web: avatar upload on the profile page (crop → presigned POST → poll `/users/me`); CSP
-      `connect-src` allows the bucket host
+- [x] Web: avatar upload on the profile page (crop → presigned POST → poll `/users/me`); set
+      `AVATAR_UPLOAD_ORIGIN` in `web/.env.local` (CSP `connect-src`), build, deploy, try it in the browser
 - [ ] CDK: CORS + notification in `Data`, Lambda + route + route throttle in `Api`, `/avatars/*` in `Web`
 
 ## 7. Ops + CI

@@ -25,11 +25,16 @@ export const inlineScriptHashes = (html: string) => {
 };
 
 /**
- * The policy: our own origin, the hashed inline scripts and Cognito. No
+ * The policy: our own origin, the hashed inline scripts, Cognito and the
+ * avatar bucket (the browser posts uploads straight to S3). No
  * `frame-ancestors`: browsers ignore it in a meta tag (the managed policy's
  * X-Frame-Options covers framing).
  */
-export const buildCsp = (scriptHashes: string[], cognitoDomain: string) =>
+export const buildCsp = (
+  scriptHashes: string[],
+  cognitoDomain: string,
+  avatarUploadOrigin: string,
+) =>
   [
     "default-src 'self'",
     `script-src 'self' ${scriptHashes.join(' ')}`,
@@ -38,16 +43,24 @@ export const buildCsp = (scriptHashes: string[], cognitoDomain: string) =>
     "img-src 'self' data: blob:",
     "font-src 'self'",
     // Amplify talks to the user pool API and the hosted domain (Google code exchange).
-    `connect-src 'self' https://cognito-idp.us-east-1.amazonaws.com https://${cognitoDomain}`,
+    `connect-src 'self' https://cognito-idp.us-east-1.amazonaws.com https://${cognitoDomain} ${avatarUploadOrigin}`,
     `form-action 'self' https://${cognitoDomain}`,
     "base-uri 'none'",
     "object-src 'none'",
   ].join('; ');
 
 /** The page with its policy first in `<head>`, so it covers every script. */
-export const withCspMeta = (html: string, cognitoDomain: string) => {
+export const withCspMeta = (
+  html: string,
+  cognitoDomain: string,
+  avatarUploadOrigin: string,
+) => {
   const page = html.replace(CSP_META, '');
-  const csp = buildCsp(inlineScriptHashes(page), cognitoDomain);
+  const csp = buildCsp(
+    inlineScriptHashes(page),
+    cognitoDomain,
+    avatarUploadOrigin,
+  );
   const meta = `<meta http-equiv="Content-Security-Policy" content="${csp}"/>`;
   return page.replace('<head>', `<head>${meta}`);
 };
@@ -62,12 +75,14 @@ const htmlFiles = (dir: string): string[] =>
 if (import.meta.main) {
   const cognitoDomain = process.env.NEXT_PUBLIC_COGNITO_DOMAIN;
   if (!cognitoDomain) throw new Error('NEXT_PUBLIC_COGNITO_DOMAIN is not set');
+  const avatarUploadOrigin = process.env.AVATAR_UPLOAD_ORIGIN?.trim();
+  if (!avatarUploadOrigin) throw new Error('AVATAR_UPLOAD_ORIGIN is not set');
 
   const files = htmlFiles('out');
   for (const file of files) {
     const html = readFileSync(file, 'utf8');
     if (!html.includes('<head>')) throw new Error(`No <head> in ${file}`);
-    writeFileSync(file, withCspMeta(html, cognitoDomain));
+    writeFileSync(file, withCspMeta(html, cognitoDomain, avatarUploadOrigin));
   }
   console.error(`CSP written into ${files.length} pages`);
 }
