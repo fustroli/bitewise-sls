@@ -154,7 +154,9 @@ Code: `POST /api/users/me/avatar-upload` in `api/src/handlers/users.ts`, re-enco
       seconds → it loads through CloudFront; a 6 MB file gets S3's `EntityTooLarge`
 - [x] Web: avatar upload on the profile page (crop → presigned POST → poll `/users/me`); set
       `AVATAR_UPLOAD_ORIGIN` in `web/.env.local` (CSP `connect-src`), build, deploy, try it in the browser
-- [ ] CDK: CORS + notification in `Data`, Lambda + route + route throttle in `Api`, `/avatars/*` in `Web`
+- [x] CDK: CORS in `Data`; processor Lambda (prebuilt `api/dist/avatar-processor.zip`, so `bun run build`
+      in `api/` before `cdk synth`), notification, route + route throttle in `Api`; shared OAC, `/avatars/*`
+      and the avatar bucket policy in `Web`
 
 ## 7. Ops + CI
 
@@ -204,6 +206,11 @@ Code: `POST /api/users/me/avatar-upload` in `api/src/handlers/users.ts`, re-enco
   processor's memory edit (1024 MB) also hadn't saved: `REPORT` lines show `Memory Size`, check them.
 - A deleted avatar stays reachable from CloudFront's edge cache (`CachingOptimized`, up to a year; the
   query string isn't in the cache key, so `?v=` doesn't bypass it). Its URL is never referenced again.
+- CDK cross-stack cycles: an S3 notification or OAC bucket policy on the Data stack's `Bucket` lands in
+  the Data stack and points at a later stack's Lambda/distribution. Both use a reference
+  (`Bucket.fromBucketArn`/`fromBucketAttributes`) in their own stack instead.
+- CDK writes bucket notifications with a custom resource (`BucketNotificationsHandler` Lambda), not
+  natively like the console; `HttpStage` has no route settings (escape hatch to `CfnStage.routeSettings`).
 
 ## Differs from `docs/plan.md`
 

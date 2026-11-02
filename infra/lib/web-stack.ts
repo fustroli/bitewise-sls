@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { CfnOutput, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
+import { Annotations, CfnOutput, RemovalPolicy, Stack, type StackProps } from 'aws-cdk-lib';
 import type { HttpApi } from 'aws-cdk-lib/aws-apigatewayv2';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -14,10 +14,20 @@ import {
   OriginProtocolPolicy,
   OriginRequestPolicy,
   ResponseHeadersPolicy,
+  S3OriginAccessControl,
+  Signing,
   ViewerProtocolPolicy,
 } from 'aws-cdk-lib/aws-cloudfront';
 import { HttpOrigin, S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
-import { BlockPublicAccess, Bucket, BucketEncryption, ObjectOwnership } from 'aws-cdk-lib/aws-s3';
+import { PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import {
+  BlockPublicAccess,
+  Bucket,
+  BucketEncryption,
+  BucketPolicy,
+  type IBucket,
+  ObjectOwnership,
+} from 'aws-cdk-lib/aws-s3';
 import type { Construct } from 'constructs';
 
 export interface WebStackProps extends StackProps {
@@ -25,6 +35,8 @@ export interface WebStackProps extends StackProps {
   domainName: string;
   /** Served under /api/* on the same domain, so the browser needs no CORS. */
   api: HttpApi;
+  /** Its avatars/ is served under /avatars/*. */
+  avatarBucket: IBucket;
 }
 
 /**
@@ -61,10 +73,20 @@ export class WebStack extends Stack {
       code: FunctionCode.fromFile({ filePath: join(import.meta.dirname, '../functions/spa-rewrite.js') }),
     });
 
+    // One OAC for both buckets: it's only signing settings, not tied to a bucket
+    const oac = new S3OriginAccessControl(this, 'Oac', { signing: Signing.SIGV4_ALWAYS });
+
+    // By name, not the Data stack's Bucket: CDK would put its OAC policy in the Data stack, pointing
+    // at this distribution (a cycle). The policy is written below instead, scoped to avatars/.
+    const avatarBucket = Bucket.fromBucketAttributes(this, 'AvatarBucket', {
+      bucketName: props.avatarBucket.bucketName,
+      region: this.region,
+    });
+
     this.distribution = new Distribution(this, 'Distribution', {
-      // Creates the OAC and the bucket policy limited to this distribution's ARN.
+      // Adds the web bucket policy limited to this distribution's ARN.
       defaultBehavior: {
-        origin: S3BucketOrigin.withOriginAccessControl(bucket),
+        origin: S3BucketOrigin.withOriginAccessControl(bucket, { originAccessControl: oac }),
         viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
         cachePolicy: CachePolicy.CACHING_OPTIMIZED,
@@ -89,6 +111,16 @@ export class WebStack extends Stack {
           responseHeadersPolicy: ResponseHeadersPolicy.SECURITY_HEADERS,
           // No SPA rewrite here: that's for the default behavior only
         },
+        // The URL path is the object key (avatars/<sub>/<ulid>.webp), so no origin path
+        '/avatars/*': {
+          origin: S3BucketOrigin.withOriginAccessControl(avatarBucket, { originAccessControl: oac }),
+          viewerProtocolPolicy: ViewerProtocolPolicy.HTTPS_ONLY,
+          allowedMethods: AllowedMethods.ALLOW_GET_HEAD,
+          // Each avatar has a new key and Cache-Control: immutable, so caching never goes stale
+          cachePolicy: CachePolicy.CACHING_OPTIMIZED,
+          responseHeadersPolicy: ResponseHeadersPolicy.SECURITY_HEADERS,
+          compress: true,
+        },
       },
       domainNames: [props.domainName],
       certificate,
@@ -96,6 +128,23 @@ export class WebStack extends Stack {
       httpVersion: HttpVersion.HTTP2_AND_3,
       enableIpv6: true,
     });
+
+    // Only re-encoded avatars are readable, never raw uploads/
+    const avatarPolicy = new BucketPolicy(this, 'AvatarBucketPolicy', { bucket: avatarBucket });
+    avatarPolicy.document.addStatements(
+      new PolicyStatement({
+        principals: [new ServicePrincipal('cloudfront.amazonaws.com')],
+        actions: ['s3:GetObject'],
+        resources: [avatarBucket.arnForObjects('avatars/*')],
+        conditions: { StringEquals: { 'AWS:SourceArn': this.distribution.distributionArn } },
+      }),
+    );
+
+    // Handled by the policy above
+    Annotations.of(this).acknowledgeWarning(
+      '@aws-cdk/aws-cloudfront-origins:updateImportedBucketPolicyOac',
+      'avatar bucket policy is written in this stack',
+    );
 
     // Target of the app domain's CNAME at Namecheap.
     new CfnOutput(this, 'DistributionDomainName', { value: this.distribution.distributionDomainName });
