@@ -211,6 +211,17 @@ Code: `POST /api/users/me/avatar-upload` in `api/src/handlers/users.ts`, re-enco
   (`Bucket.fromBucketArn`/`fromBucketAttributes`) in their own stack instead.
 - CDK writes bucket notifications with a custom resource (`BucketNotificationsHandler` Lambda), not
   natively like the console; `HttpStage` has no route settings (escape hatch to `CfnStage.routeSettings`).
+- First `cdk deploy`: `CfnStage.routeSettings` is raw JSON (`any`), so CDK doesn't PascalCase its keys.
+  camelCase passed `cdk synth` but failed the stage create ("Unrecognized field throttlingBurstLimit").
+  Write `ThrottlingRateLimit`/`ThrottlingBurstLimit`; check JSON-typed props in the synthed template.
+- First `cdk deploy`: the Auth stack needs SSM String `/bitewise-sls/google-client-id` and secret
+  `bitewise-sls/google-client-secret` to exist first (resolved at change-set creation).
+- The secret must be **Plaintext** (just `GOCSPX-…`). Created as key/value it's JSON, Cognito sends the
+  whole JSON and Google answers `401 invalid_client`. Fixing it in Secrets Manager isn't enough:
+  CloudFormation resolves `{{resolve:secretsmanager:…}}` only when the resource updates, so an unchanged
+  template keeps the old value. Paste it into the Google IdP in the Cognito console too.
+- The CDK pool's domain is `bitewise-sls.auth.us-east-1.amazoncognito.com`: add
+  `https://<it>/oauth2/idpresponse` to the Google OAuth client's redirect URIs.
 
 ## Differs from `docs/plan.md`
 
